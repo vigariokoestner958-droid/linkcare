@@ -1,0 +1,2075 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>悦排 · 正畸方案设计工作台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f3fafb;--surface:#ffffff;--outline:#cce8ef;
+  --fg:#0f2a35;--muted:#557080;--primary:#00b5d8;--primary-d:#009baa;
+  --success:#16a34a;--success-bg:#e9f8ef;--warn:#d97706;--warn-bg:#fef3c7;
+  --danger:#dc2626;--danger-bg:#fef2f2;
+  --z-red:#dc2626;--z-red-bg:#fff1f1;--z-yellow:#d97706;--z-yellow-bg:#fffbeb;
+  --z-blue:#00b5d8;--z-blue-bg:#e5f8fc;--z-gray:#94a3b8;--z-gray-bg:#f8fafc;
+  --font:'Roboto',-apple-system,sans-serif;--mono:'Roboto Mono',ui-monospace,monospace;
+  --r-sm:8px;--r-md:14px;--r-lg:20px;--r-xl:24px;--r-pill:999px;
+  --sh-float:0 16px 40px rgba(15,23,42,.14);
+  --t-fast:140ms;--t-base:200ms;--ease:cubic-bezier(.2,0,0,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--font);font-size:14px;color:var(--fg);background:var(--bg);-webkit-font-smoothing:antialiased;}
+.shell{display:grid;grid-template-columns:60px 1fr;height:100vh;}
+.sidebar{background:#0d7a93;border-right:1px solid #0a6278;display:flex;flex-direction:column;align-items:center;padding:16px 0 20px;gap:0;}
+.s-logo{width:38px;height:38px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;font-weight:900;margin-bottom:20px;box-shadow:0 4px 12px rgba(0,181,216,.35);}
+.s-nav{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;width:100%;padding:0 8px;}
+.s-item{width:44px;height:44px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:rgba(255,255,255,.55);font-size:9px;transition:all var(--t-fast) var(--ease);}
+.s-item svg{width:18px;height:18px;}
+.s-item.active{background:rgba(255,255,255,.18);color:#fff;}
+.s-item:hover:not(.active){background:rgba(255,255,255,.1);color:rgba(255,255,255,.85);}
+.s-bottom{display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 8px;}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#00c4e0,#009baa);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;cursor:pointer;}
+.main{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+.app-header{background:var(--surface);border-bottom:1px solid var(--outline);padding:0 22px;height:56px;display:flex;align-items:center;gap:20px;flex-shrink:0;}
+/* ── Brand wordmark — Linkedcare style ── */
+.brand{display:flex;align-items:center;gap:0;line-height:1;}
+.brand-icon{display:flex;align-items:center;justify-content:center;margin-right:8px;flex-shrink:0;width:22px;height:22px;}
+.brand-yp{font-family:'Nunito',-apple-system,system-ui,sans-serif;font-size:18px;font-weight:900;color:#00B4D8;letter-spacing:-.03em;line-height:1;display:flex;align-items:center;}
+.brand-divider{width:1px;height:15px;background:var(--outline);margin:0 11px;flex-shrink:0;align-self:center;}
+.brand-product{display:flex;flex-direction:column;gap:1px;}
+.brand-prod-name{font-size:12px;font-weight:600;color:var(--fg);letter-spacing:.01em;line-height:1.2;}
+.brand-by{font-size:9px;font-weight:500;color:var(--muted);letter-spacing:.04em;line-height:1;}
+.h-stats{display:flex;gap:10px;margin-left:auto;}
+.stat{display:flex;align-items:center;gap:8px;padding:5px 13px;background:var(--bg);border:1px solid var(--outline);border-radius:var(--r-pill);}
+.stat-lbl{font-size:11px;color:var(--muted);}
+.stat-val{font-size:12px;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums;}
+.stat-val.g{color:var(--success);}
+.h-actions{display:flex;align-items:center;gap:6px;}
+.icon-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--outline);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all var(--t-fast);position:relative;}
+.icon-btn:hover{background:var(--bg);color:var(--fg);}
+.badge{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--danger);border-radius:50%;border:1.5px solid var(--surface);}
+.content{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.split-area{flex:1;min-height:0;display:flex;overflow:hidden;}
+.list-area{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;}
+.zone-bar{background:var(--surface);border-bottom:1px solid var(--outline);padding:0 22px;height:48px;display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.zb-lbl{font-size:11px;color:var(--muted);margin-right:4px;}
+.z-chip{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:var(--r-pill);border:1.5px solid transparent;cursor:pointer;font-size:12px;font-weight:600;transition:all var(--t-fast);user-select:none;}
+.z-chip.cr{color:var(--z-red);background:var(--z-red-bg);}
+.z-chip.ur{color:#92400e;background:var(--z-yellow-bg);}
+.z-chip.pe{color:var(--z-blue);background:var(--z-blue-bg);}
+.z-chip.pa{color:#475569;background:var(--z-gray-bg);}
+.z-chip.on{border-color:currentColor;box-shadow:inset 0 0 0 1px currentColor;}
+.z-chip:hover{filter:brightness(.96);}
+.z-dot{width:7px;height:7px;border-radius:50%;}
+.d-r{background:var(--z-red);}.d-y{background:var(--z-yellow);}.d-b{background:var(--z-blue);}.d-g{background:var(--z-gray);}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.pulse{animation:pulse 1.8s ease-in-out infinite;}
+.zb-right{margin-left:auto;font-size:11px;color:var(--muted);}
+.zb-clear-btn{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:var(--r-pill);border:1.5px solid var(--danger);background:transparent;cursor:pointer;font-family:var(--font);font-size:11px;font-weight:700;color:var(--danger);transition:all var(--t-fast);}
+.zb-clear-btn:hover{background:var(--danger);color:#fff;}
+.toolbar{padding:10px 22px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.search{display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--outline);border-radius:var(--r-md);padding:7px 12px;width:240px;transition:border-color var(--t-fast);}
+.search:focus-within{border-color:var(--primary);}
+.search input{border:none;outline:none;background:transparent;font-family:var(--font);font-size:13px;color:var(--fg);flex:1;}
+.search input::placeholder{color:var(--muted);}
+.search svg{color:var(--muted);flex-shrink:0;}
+.tb-btn{display:flex;align-items:center;gap:6px;padding:7px 13px;background:var(--surface);border:1px solid var(--outline);border-radius:var(--r-md);cursor:pointer;font-family:var(--font);font-size:12px;font-weight:500;color:var(--fg);transition:all var(--t-fast);}
+.tb-btn:hover{background:var(--bg);border-color:var(--primary);}
+.tb-sep{flex:1;}
+.view-toggle{display:flex;background:var(--surface);border:1px solid var(--outline);border-radius:var(--r-md);padding:3px;}
+.vbtn{padding:4px 11px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;color:var(--muted);transition:all var(--t-fast);}
+.vbtn.on{background:var(--primary);color:#fff;}
+/* FIX 1: focus card — brand blue gradient */
+.fc-wrap{padding:0 22px;flex-shrink:0;}
+.fc{background:linear-gradient(135deg,#0a7a95 0%,#0096b3 100%);color:#fff;border-radius:var(--r-xl);padding:14px 18px;margin-bottom:10px;position:relative;overflow:hidden;}
+.fc::after{content:'';position:absolute;top:-30px;right:-30px;width:130px;height:130px;background:radial-gradient(circle,rgba(0,181,216,.08) 0%,transparent 65%);pointer-events:none;}
+.fc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.fc-greet{font-size:13px;font-weight:600;color:#ffffff;}
+.fc-date{font-size:11px;color:rgba(255,255,255,.65);}
+.fc-actions{display:flex;align-items:center;gap:8px;}
+.fc-cbtn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:3px 8px;color:rgba(255,255,255,.85);cursor:pointer;font-size:10px;font-family:var(--font);transition:background var(--t-fast);}
+.fc-cbtn:hover{background:rgba(255,255,255,.25);}
+.fc-alert{background:rgba(255,255,255,.12);border:1px solid rgba(255,107,107,.45);border-radius:10px;padding:9px 14px;display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.fc-al-lbl{font-size:10px;font-weight:700;color:#ff6b6b;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;}
+.fc-al-case{font-size:13px;font-weight:700;flex:1;cursor:pointer;color:#ffffff;}
+.fc-al-case:hover{text-decoration:underline;color:#ff6b6b;}
+.fc-al-sla{font-size:12px;color:#ff6b6b;font-family:var(--mono);white-space:nowrap;font-weight:700;}
+.fc-meta{display:flex;align-items:center;gap:16px;font-size:11px;color:rgba(255,255,255,.7);}
+.fc-meta strong{color:#ffffff;}
+.fc-hint{margin-top:6px;font-size:11px;color:rgba(255,255,255,.65);}
+/* FIX 3: thead left padding = 4px border + 14px row padding = 18px */
+.cl-wrap{padding:0 22px 0;flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+.case-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:24px;}
+.case-scroll::-webkit-scrollbar{width:5px;}
+.case-scroll::-webkit-scrollbar-thumb{background:var(--outline);border-radius:3px;}
+.cl-thead{display:flex;align-items:center;padding:0 14px 0 18px;height:32px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--outline);margin-bottom:3px;}
+.ch-id{width:88px;flex-shrink:0;}.ch-patient{flex:1;}.ch-summary{width:240px;flex-shrink:0;}.ch-sla{width:96px;flex-shrink:0;text-align:center;}.ch-action{width:136px;flex-shrink:0;text-align:right;}
+.cr{border-radius:var(--r-lg);margin-bottom:3px;background:var(--surface);border:1px solid var(--outline);overflow:hidden;transition:box-shadow var(--t-base) var(--ease);}
+.cr:focus{outline:none;}
+.cr.kb-focus{box-shadow:0 0 0 2px var(--primary);}
+.cr.z-cr{border-left:4px solid var(--z-red);background:#fff0f0;}
+.cr.z-ur{border-left:4px solid var(--z-yellow);background:#fffdf0;}
+.cr.z-pe{border-left:4px solid var(--z-blue);background:#e8f8fb;}
+.cr.z-pa{border-left:4px solid var(--z-gray);}
+@keyframes flashGreen{0%,100%{background:var(--surface)}50%{background:#dcfce7}}
+.cr.flash{animation:flashGreen 650ms ease-out;}
+.cr-main{display:flex;align-items:flex-start;padding:14px 14px;cursor:pointer;transition:background var(--t-fast);min-height:86px;}
+.cr:hover .cr-main{background:rgba(0,181,216,.025);}
+.c-id{width:88px;flex-shrink:0;display:flex;align-items:center;gap:5px;}
+.case-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--muted);}
+.zn-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px 2px 5px;border-radius:var(--r-pill);font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.01em;white-space:nowrap;}
+.zn-badge .zn-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.zn-cr{background:rgba(220,38,38,.12);color:#b91c1c;}.zn-cr .zn-dot{background:#dc2626;}
+.zn-ur{background:rgba(217,119,6,.13);color:#92400e;}.zn-ur .zn-dot{background:#d97706;}
+.zn-pe{background:rgba(0,181,216,.12);color:#007a96;}.zn-pe .zn-dot{background:#00b5d8;}
+.zn-pa{background:rgba(148,163,184,.12);color:#475569;}.zn-pa .zn-dot{background:#94a3b8;}
+@keyframes fflame{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.flame{animation:fflame 2s ease-in-out infinite;}
+.c-pat{flex:1;min-width:0;padding-right:10px;}
+.p-name{font-size:13px;font-weight:700;}
+.p-age{font-size:11px;color:var(--muted);font-weight:400;margin-left:3px;}
+.p-tags{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px;}
+.tag{font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;white-space:nowrap;}
+.t-r{background:#fef2f2;color:#b91c1c;}.t-o{background:#fff7ed;color:#c2410c;}.t-g{background:var(--bg);color:var(--muted);}
+/* FIX 9: priority reason chip (3rd layer, same as tags) */
+.reason-chip{font-size:9px;padding:2px 5px;border-radius:4px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.reason-chip.r{background:rgba(220,38,38,.1);color:#b91c1c;}
+.reason-chip.y{background:rgba(217,119,6,.1);color:#92400e;}
+.reason-chip.b{background:rgba(0,181,216,.12);color:#007a96;}
+.reason-chip.g{background:var(--bg);color:var(--muted);}
+/* FIX 2: doctor stars — 1=danger 2=warn 3=success */
+.c-col{width:168px;flex-shrink:0;padding-right:10px;opacity:0;transition:opacity var(--t-fast);}
+.cr:hover .c-col,.cr.kb-focus .c-col{opacity:1;}
+.col-clinic{font-size:12px;font-weight:500;}
+.col-doc{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:3px;}
+.stars{letter-spacing:-1px;font-size:9px;}
+.stars.s1{color:var(--danger);}
+.stars.s2{color:var(--warn);}
+.stars.s3{color:var(--success);}
+.c-sla{width:96px;flex-shrink:0;text-align:center;padding-right:10px;padding-top:2px;}
+.sla-v{font-family:var(--mono);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;}
+.sla-v.g{color:var(--success);}.sla-v.o{color:var(--warn);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.45}}
+.sla-v.r{color:var(--danger);animation:blink 1.4s ease-in-out infinite;}
+.sla-v.gray{color:var(--muted);font-size:10px;font-weight:500;}
+.sla-lbl{font-size:9px;color:var(--muted);margin-top:1px;}
+.c-sum{width:240px;flex-shrink:0;padding-right:10px;}
+.sum-txt{font-size:11px;color:var(--muted);line-height:1.5;}
+.sum-txt.hot{cursor:pointer;color:#475569;}
+.sum-txt.hot:hover{color:var(--primary);text-decoration:underline;}
+.c-act{width:136px;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;gap:6px;padding-top:2px;}
+.act-btn{padding:6px 13px;border-radius:var(--r-pill);border:none;cursor:pointer;font-family:var(--font);font-size:11px;font-weight:700;transition:all var(--t-fast);white-space:nowrap;}
+.done-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid #d1fae5;background:#f0fdf4;color:#16a34a;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all var(--t-fast);font-size:14px;line-height:1;}
+.done-btn:hover{background:#16a34a;color:#fff;border-color:#16a34a;transform:scale(1.08);}
+.done-btn:active{transform:scale(.94);}
+.done-btn.done-state{background:#16a34a;color:#fff;border-color:#16a34a;cursor:default;}
+.ab-cr{background:var(--danger);color:#fff;}.ab-cr:hover{background:#b91c1c;}
+.ab-ur{background:var(--primary);color:#fff;}.ab-ur:hover{background:var(--primary-d);}
+.ab-pe{background:var(--bg);color:var(--muted);border:1px solid var(--outline);}.ab-pe:hover{background:var(--outline);}
+.ab-pa{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;}.ab-pa:hover{background:#ffedd5;}
+.drawer{max-height:0;overflow:hidden;transition:max-height 220ms ease-out;}
+.drawer.open{max-height:440px;border-top:1px solid var(--outline);}
+.d-inner{padding:14px 18px;display:grid;grid-template-columns:1fr 1fr;gap:14px;background:#fafbfd;}
+.d-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:9px;}
+.d-todos{display:flex;flex-direction:column;gap:5px;}
+.d-todo{display:flex;align-items:flex-start;gap:7px;font-size:12px;}
+.d-cb{width:15px;height:15px;border:1.5px solid var(--outline);border-radius:4px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;transition:all var(--t-fast);margin-top:1px;}
+.d-cb.ck{background:var(--success);border-color:var(--success);color:#fff;}
+.d-txt.done{text-decoration:line-through;color:var(--muted);}
+.d-prog{margin-top:8px;}.d-prog-lbl{font-size:10px;color:var(--muted);margin-bottom:3px;}
+.d-prog-bar{height:3px;background:var(--outline);border-radius:2px;overflow:hidden;}
+.d-prog-fill{height:100%;background:var(--success);border-radius:2px;transition:width var(--t-base);}
+.d-table{width:100%;border-collapse:collapse;font-size:11px;}
+.d-table th{text-align:left;padding:5px 7px;background:var(--bg);border:1px solid var(--outline);font-weight:700;color:var(--muted);}
+.d-table td{padding:5px 7px;border:1px solid var(--outline);}
+.d-table td.diff{color:var(--danger);font-weight:600;}
+.d-acts{grid-column:1/-1;display:flex;gap:7px;padding-top:10px;border-top:1px solid var(--outline);align-items:center;flex-wrap:wrap;}
+.d-btn{padding:6px 13px;border-radius:var(--r-pill);border:1px solid var(--outline);background:var(--surface);cursor:pointer;font-family:var(--font);font-size:11px;font-weight:600;color:var(--fg);transition:all var(--t-fast);}
+.d-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+.d-btn.prim{background:var(--primary);color:#fff;border-color:var(--primary);}.d-btn.prim:hover{background:var(--primary-d);}
+/* FIX 7: done button — reset circular shape from .done-btn */
+.d-btn.done-btn{width:auto;height:auto;border-radius:var(--r-pill);font-size:11px;background:var(--success-bg);color:var(--success);border-color:#86efac;font-weight:700;}
+.d-btn.done-btn:hover{background:var(--success);color:#fff;border-color:var(--success);transform:none;}
+.d-close{margin-left:auto;background:transparent;border:none;cursor:pointer;color:var(--muted);font-size:11px;padding:5px;font-family:var(--font);}
+/* 查看消息原件弹窗 */
+.msg-view-btn{display:flex;align-items:center;gap:5px;margin-top:8px;padding:5px 10px;background:var(--bg);border:1px solid var(--outline);border-radius:var(--r-sm);cursor:pointer;font-family:var(--font);font-size:11px;color:var(--muted);transition:all var(--t-fast);}
+.msg-view-btn:hover{border-color:var(--primary);color:var(--primary);background:rgba(0,181,216,.05);}
+.mo{position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;background:rgba(15,30,45,.45);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity var(--t-base);}
+.mo.open{opacity:1;pointer-events:all;}
+.mo-box{background:var(--surface);border-radius:var(--r-xl);box-shadow:0 24px 64px rgba(0,0,0,.2);width:960px;max-width:calc(100vw - 40px);max-height:85vh;display:flex;flex-direction:column;transform:translateY(16px);transition:transform var(--t-base) var(--ease);}
+.mo.open .mo-box{transform:translateY(0);}
+.mo-hd{display:flex;align-items:center;padding:16px 20px 12px;gap:12px;flex-shrink:0;border-bottom:1px solid var(--outline);}
+.mo-title{font-size:15px;font-weight:700;color:var(--fg);flex:1;}
+.mo-who{font-size:11px;color:var(--muted);}
+.mo-close-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--outline);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:16px;transition:all var(--t-fast);}
+.mo-close-btn:hover{background:var(--bg);color:var(--fg);}
+.mo-tabs{display:none;}
+.mo-body{flex:1;overflow:hidden;padding:0;display:flex;gap:0;}
+.mo-col-left{width:46%;border-right:1px solid var(--outline);overflow-y:auto;padding:16px 18px 20px;flex-shrink:0;}
+.mo-col-right{flex:1;overflow-y:auto;padding:16px 18px 20px;display:flex;flex-direction:column;gap:0;background:var(--bg);}
+.mo-col-left::-webkit-scrollbar,.mo-col-right::-webkit-scrollbar{width:4px;}
+.mo-col-left::-webkit-scrollbar-thumb,.mo-col-right::-webkit-scrollbar-thumb{background:var(--outline);border-radius:2px;}
+.mo-col-hd{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--outline);}
+.mo-panel{display:block !important;}
+/* Tab1: 消息原件 */
+.raw-msg-card{background:#f8fafc;border:1px solid var(--outline);border-radius:var(--r-md);padding:14px 16px;margin-bottom:12px;}
+.raw-msg-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.raw-msg-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.raw-msg-from{font-size:12px;font-weight:700;color:var(--fg);}
+.raw-msg-time{font-size:10px;color:var(--muted);}
+.raw-msg-text{font-size:13px;line-height:1.65;color:var(--fg);white-space:pre-wrap;}
+.raw-msg-attach{display:flex;align-items:center;gap:7px;margin-top:10px;padding:8px 10px;background:var(--surface);border:1px solid var(--outline);border-radius:var(--r-sm);font-size:11px;color:var(--muted);cursor:pointer;}
+.raw-msg-attach:hover{border-color:var(--primary);color:var(--primary);}
+/* Tab2: AI识别 */
+.ai-rec-section{margin-bottom:14px;}
+.ai-rec-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.ai-rec-row{display:flex;align-items:baseline;gap:8px;padding:6px 10px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:4px;font-size:12px;}
+.ai-rec-key{color:var(--muted);width:80px;flex-shrink:0;}
+.ai-rec-val{color:var(--fg);font-weight:600;}
+.ai-rec-diff{color:var(--danger);font-size:10px;font-weight:700;padding:1px 5px;background:#fef2f2;border-radius:3px;}
+.ai-conf{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--success-bg);border:1px solid #86efac;border-radius:var(--r-sm);font-size:11px;color:var(--success);font-weight:600;}
+/* Tab3: 增减需求 */
+.req-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.req-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg);border-radius:var(--r-sm);border:1px solid var(--outline);}
+.req-cb{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all var(--t-fast);}
+.req-cb.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+.req-item-txt{flex:1;font-size:12px;color:var(--fg);}
+.req-item-src{font-size:10px;color:var(--muted);margin-left:auto;}
+.req-add{display:flex;gap:8px;align-items:center;}
+.req-add input{flex:1;border:1px solid var(--outline);border-radius:var(--r-sm);padding:7px 10px;font-family:var(--font);font-size:12px;color:var(--fg);outline:none;transition:border-color var(--t-fast);}
+.req-add input:focus{border-color:var(--primary);}
+.req-add-btn{padding:7px 13px;background:var(--primary);color:#fff;border:none;border-radius:var(--r-sm);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.mo-footer{display:flex;align-items:center;gap:8px;padding:12px 20px;border-top:1px solid var(--outline);flex-shrink:0;}
+.mo-act-btn{padding:7px 16px;border-radius:var(--r-sm);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all var(--t-fast);}
+.mo-act-btn.prim{background:var(--primary);color:#fff;border:none;}
+.mo-act-btn.prim:hover{background:var(--primary-d);}
+.mo-act-btn.sec{background:transparent;border:1px solid var(--outline);color:var(--fg);}
+.mo-act-btn.sec:hover{border-color:var(--primary);color:var(--primary);}
+.mo-act-btn.contact{background:linear-gradient(135deg,#0096b3,#00b5d8);color:#fff;border:none;margin-right:auto;display:flex;align-items:center;}
+.mo-act-btn.contact:hover{background:linear-gradient(135deg,#0082a0,#0096b3);box-shadow:0 3px 10px rgba(0,181,216,.35);}
+/* 联系医生弹窗 */
+.cd-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:2000;display:none;align-items:center;justify-content:center;}
+.cd-overlay.open{display:flex;}
+.cd-box{background:var(--surface);border-radius:var(--r-xl);width:460px;box-shadow:0 20px 60px rgba(0,0,0,.2);overflow:hidden;animation:slideUp var(--t-base) var(--ease);}
+.cd-hd{background:linear-gradient(135deg,#074a5e,#009baa);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;}
+.cd-hd-title{font-size:14px;font-weight:700;color:#fff;}
+.cd-hd-sub{font-size:11px;color:rgba(255,255,255,.7);margin-top:2px;}
+.cd-close{background:rgba(255,255,255,.15);border:none;border-radius:8px;width:28px;height:28px;cursor:pointer;color:rgba(255,255,255,.85);font-size:16px;display:flex;align-items:center;justify-content:center;}
+.cd-close:hover{background:rgba(255,255,255,.25);}
+.cd-body{padding:20px;}
+.cd-doctor-card{display:flex;align-items:center;gap:12px;background:var(--bg);border:1px solid var(--outline);border-radius:var(--r-md);padding:12px 14px;margin-bottom:16px;}
+.cd-doc-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#0096b3,#00b5d8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;font-weight:700;flex-shrink:0;}
+.cd-doc-name{font-size:14px;font-weight:700;}
+.cd-doc-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.cd-doc-star{color:#f59e0b;font-size:11px;}
+.cd-channels{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.cd-ch{border:1px solid var(--outline);border-radius:var(--r-md);padding:12px 14px;cursor:pointer;transition:all var(--t-fast);background:var(--surface);}
+.cd-ch:hover{border-color:var(--primary);background:#e5f8fc;}
+.cd-ch-icon{font-size:20px;margin-bottom:6px;}
+.cd-ch-name{font-size:12px;font-weight:700;color:var(--fg);}
+.cd-ch-desc{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.cd-msg-area{border:1px solid var(--outline);border-radius:var(--r-md);overflow:hidden;}
+.cd-msg-lbl{font-size:11px;font-weight:700;color:var(--muted);padding:10px 12px 6px;background:var(--bg);border-bottom:1px solid var(--outline);letter-spacing:.04em;text-transform:uppercase;}
+.cd-msg-pre{padding:10px 12px;font-size:12px;color:var(--fg);line-height:1.6;min-height:70px;outline:none;}
+.cd-msg-pre[contenteditable=true]:focus{background:var(--surface);}
+.cd-footer{padding:12px 20px;border-top:1px solid var(--outline);display:flex;gap:8px;justify-content:flex-end;}
+.cd-send-btn{padding:8px 20px;background:var(--primary);color:#fff;border:none;border-radius:var(--r-sm);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:background var(--t-fast);}
+.cd-send-btn:hover{background:var(--primary-d);}
+.cd-cancel-btn{padding:8px 14px;background:transparent;border:1px solid var(--outline);border-radius:var(--r-sm);font-family:var(--font);font-size:12px;color:var(--fg);cursor:pointer;transition:all var(--t-fast);}
+.cd-cancel-btn:hover{border-color:var(--primary);color:var(--primary);}
+/* FIX 9: reason in drawer */
+.d-reason{font-size:10px;color:var(--muted);margin-bottom:10px;padding:6px 10px;background:var(--bg);border-radius:6px;border-left:3px solid var(--warn);line-height:1.5;}
+.d-reason strong{color:var(--fg);}
+.mat-list{display:flex;flex-direction:column;gap:5px;}.mat-item{display:flex;align-items:center;gap:6px;font-size:12px;}.mat-name{flex:1;}
+.mat-badge{font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;}
+.mb-req{background:var(--danger-bg);color:#b91c1c;}.mb-opt{background:var(--bg);color:var(--muted);}.mb-ok{background:var(--success-bg);color:var(--success);}
+.urge-tl{display:flex;flex-direction:column;gap:7px;}.urge-row{display:flex;gap:10px;font-size:11px;color:var(--muted);}.urge-t{color:var(--fg);font-weight:500;flex-shrink:0;}
+.hc{position:fixed;z-index:9999;width:320px;background:var(--surface);border:1px solid var(--outline);border-radius:var(--r-xl);box-shadow:var(--sh-float);overflow:hidden;opacity:0;pointer-events:none;transition:opacity 110ms var(--ease),transform 110ms var(--ease);transform:translateY(5px);}
+.hc.vis{opacity:1;pointer-events:auto;transform:translateY(0);}
+.hc-head{padding:11px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--outline);background:var(--bg);}
+.hc-title{font-size:12px;font-weight:700;}.hc-meta{font-size:10px;color:var(--muted);text-align:right;max-width:160px;}
+.hc-body{padding:12px 14px;}.hc-list{display:flex;flex-direction:column;gap:7px;}.hc-item{display:flex;align-items:flex-start;gap:7px;font-size:12px;}
+.hc-cb{width:15px;height:15px;border:1.5px solid var(--outline);border-radius:4px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;transition:all var(--t-fast);margin-top:1px;}
+.hc-cb:hover{border-color:var(--primary);}.hc-cb.ck{background:var(--success);border-color:var(--success);color:#fff;}
+.hc-prog{font-size:10px;color:var(--muted);margin-top:5px;}
+.hc-foot{display:flex;gap:6px;padding:9px 14px;border-top:1px solid var(--outline);background:var(--bg);}
+.hc-btn{flex:1;padding:6px 8px;border-radius:var(--r-pill);border:1px solid var(--outline);background:var(--surface);cursor:pointer;font-family:var(--font);font-size:11px;font-weight:600;color:var(--fg);transition:all var(--t-fast);text-align:center;}
+.hc-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+.hc-btn.p{background:var(--primary);color:#fff;border-color:var(--primary);}.hc-btn.p:hover{background:var(--primary-d);}
+.hc-btn.u{background:#fff7ed;color:#c2410c;border-color:#fed7aa;}.hc-btn.u.done{background:var(--success-bg);color:var(--success);border-color:#86efac;}
+/* FIX 4: Tab view */
+.ai-view{display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0;}
+.ai-view.hidden{display:none;}
+.tab-view{display:none;flex-direction:column;flex:1;}
+.tab-view.active{display:flex;}
+.tab-nav{background:var(--surface);border-bottom:1px solid var(--outline);padding:0 22px;display:flex;gap:0;flex-shrink:0;}
+.tn-item{padding:10px 16px;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);transition:all var(--t-fast);white-space:nowrap;user-select:none;}
+.tn-item.on{border-bottom-color:var(--primary);color:var(--primary);}
+.tn-item:hover:not(.on){color:var(--fg);}
+.tab-body{flex:1;overflow-y:auto;padding:14px 22px 24px;}
+.tab-body::-webkit-scrollbar{width:5px;}
+.tab-body::-webkit-scrollbar-thumb{background:var(--outline);border-radius:3px;}
+.tab-sec-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:8px 0 4px;display:flex;gap:6px;align-items:center;}
+.tab-row{display:flex;align-items:center;padding:10px 14px;background:var(--surface);border:1px solid var(--outline);border-radius:var(--r-md);margin-bottom:4px;gap:12px;cursor:pointer;transition:box-shadow var(--t-fast);}
+.tab-row:hover{box-shadow:0 2px 10px rgba(15,23,42,.08);}
+.tab-row.z-cr{border-left:4px solid var(--z-red);background:#fff0f0;}
+.tab-row.z-ur{border-left:4px solid var(--z-yellow);background:#fffdf0;}
+.tab-row.z-pe{border-left:4px solid var(--z-blue);background:#e8f8fb;}
+.tab-row.z-pa{border-left:4px solid var(--z-gray);}
+.tr-id{font-family:var(--mono);font-size:11px;color:var(--muted);width:80px;flex-shrink:0;}
+.tr-pat{flex:1;font-size:13px;font-weight:700;}
+.tr-pat small{font-size:11px;font-weight:400;color:var(--muted);margin-left:4px;}
+.tr-clinic{font-size:11px;color:var(--muted);width:130px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tr-sla{font-family:var(--mono);font-size:11px;font-weight:700;width:88px;text-align:right;flex-shrink:0;}
+.tr-reason{font-size:10px;color:var(--muted);flex:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tr-act{flex-shrink:0;}
+.toast-area{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:7px;pointer-events:none;z-index:99999;}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.toast{background:#0a4a5e;color:#fff;padding:9px 18px;border-radius:var(--r-pill);font-size:12px;font-weight:500;animation:toastIn 180ms ease-out;box-shadow:var(--sh-float);white-space:nowrap;}
+.sc-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:9998;display:none;align-items:center;justify-content:center;}
+.sc-overlay.open{display:flex;}
+.sc-panel{background:var(--surface);border-radius:var(--r-xl);padding:22px;width:400px;box-shadow:var(--sh-float);}
+.sc-panel h3{font-size:15px;font-weight:900;margin-bottom:14px;}
+.sc-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--outline);font-size:12px;}
+.sc-row:last-of-type{border-bottom:none;}
+.sc-row kbd{background:var(--bg);border:1px solid var(--outline);border-radius:5px;padding:2px 6px;font-size:10px;font-family:var(--mono);font-weight:700;}
+.sc-close{margin-top:14px;width:100%;padding:9px;background:var(--primary);color:#fff;border:none;border-radius:var(--r-pill);cursor:pointer;font-family:var(--font);font-size:13px;font-weight:700;}
+.empty{padding:40px;text-align:center;color:var(--muted);}.empty p{font-size:14px;margin-top:6px;}
+/* ─── AI Assistant Panel ─── */
+.ai-panel{width:300px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--outline);display:flex;flex-direction:column;overflow:hidden;transition:width 220ms var(--ease);}
+.ai-panel.collapsed{width:0;}
+.ai-panel.collapsed .aip-tabs,.ai-panel.collapsed .aip-content,.ai-panel.collapsed .aip-hd{display:none;}
+/* Floating handle trigger — fixed to viewport right edge when collapsed */
+.aip-trigger{position:fixed;right:0;top:50%;transform:translateY(-50%);width:36px;height:88px;background:linear-gradient(160deg,#0a7a95 0%,#0096b3 100%);border-radius:12px 0 0 12px;display:none;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer;box-shadow:-3px 0 14px rgba(10,122,149,.45);transition:width var(--t-fast) var(--ease),box-shadow var(--t-fast);z-index:200;}
+.aip-trigger:hover{width:40px;box-shadow:-5px 0 20px rgba(10,122,149,.55);}
+.ai-panel.collapsed .aip-trigger{display:flex;}
+.aip-trigger-icon{width:22px;height:22px;background:rgba(255,255,255,.2);border-radius:7px;display:flex;align-items:center;justify-content:center;}
+.aip-trigger-label{font-size:9px;font-weight:700;color:rgba(255,255,255,.9);writing-mode:vertical-rl;letter-spacing:.1em;}
+.aip-collapse-btn{background:rgba(255,255,255,.15);border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;color:rgba(255,255,255,.8);display:flex;align-items:center;justify-content:center;transition:all var(--t-fast);flex-shrink:0;margin-left:auto;}
+.aip-collapse-btn:hover{background:rgba(255,255,255,.25);color:#fff;}
+.aip-hd{height:48px;border-bottom:1px solid var(--outline);display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0;background:linear-gradient(135deg,#0a7a95 0%,#0096b3 100%);}
+.aip-hd-title{font-size:13px;font-weight:700;color:#fff;flex:1;display:flex;align-items:center;gap:6px;letter-spacing:-.01em;}
+.aip-badge{font-size:9px;font-weight:700;background:rgba(0,155,170,.15);border-radius:var(--r-pill);padding:2px 7px;color:#007a96;}
+.aip-tabs{display:flex;border-bottom:1px solid var(--outline);flex-shrink:0;}
+.apt{flex:1;padding:9px 2px;font-family:var(--font);font-size:11px;font-weight:600;border:none;background:transparent;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all var(--t-fast);}
+.apt.on{color:var(--primary);border-bottom-color:var(--primary);background:rgba(0,181,216,.04);}
+.apt:hover:not(.on){color:var(--fg);}
+.aip-content{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.aip-tab{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.aip-tab.on{display:flex;}
+.aip-scroll{flex:1;overflow-y:auto;padding:12px 13px 20px;}
+.aip-scroll::-webkit-scrollbar{width:4px;}
+.aip-scroll::-webkit-scrollbar-thumb{background:var(--outline);border-radius:2px;}
+.aip-sec-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:5px;}
+.goal-bar{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #bfdbfe;border-radius:var(--r-md);padding:10px 12px;margin-bottom:10px;}
+.gb-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;font-weight:500;}
+.gb-val{font-weight:800;color:var(--primary);}
+.gb-prog-bg{height:5px;background:rgba(255,255,255,.6);border-radius:3px;overflow:hidden;}
+.gb-prog-fill{height:100%;background:var(--primary);border-radius:3px;transition:width var(--t-base);}
+.plan-item{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:4px;border:1px solid var(--outline);}
+.plan-item.pi-cr{border-left:3px solid var(--z-red);background:#fffafa;}
+.plan-item.pi-ur{border-left:3px solid var(--z-yellow);}
+.pi-time{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;margin-top:2px;width:34px;flex-shrink:0;}
+.pi-body{flex:1;min-width:0;}
+.pi-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pi-sub{font-size:10px;color:var(--muted);margin-top:1px;}
+.pi-dur{font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.dur-cr{background:var(--danger-bg);color:var(--danger);}
+.dur-ur{background:var(--warn-bg);color:var(--warn);}
+.alert-row{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:#fffbeb;border:1px solid #fde68a;border-radius:var(--r-sm);margin-bottom:4px;font-size:11px;}
+.alert-icon{flex-shrink:0;font-size:13px;margin-top:1px;}
+.alert-body b{display:block;margin-bottom:2px;font-weight:700;}
+/* Chat tab */
+.chat-msgs{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px;}
+.chat-msgs::-webkit-scrollbar{width:4px;}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(--outline);border-radius:2px;}
+.msg{max-width:90%;font-size:12px;line-height:1.55;}
+.msg.user{align-self:flex-end;background:var(--primary);color:#fff;padding:7px 11px;border-radius:12px 12px 3px 12px;}
+.msg.ai{align-self:flex-start;background:var(--bg);border:1px solid var(--outline);padding:7px 11px;border-radius:3px 12px 12px 12px;color:var(--fg);}
+.msg.ai .msg-tag{font-size:9px;font-weight:700;color:var(--muted);margin-bottom:3px;letter-spacing:.04em;}
+.msg.ai.thinking{opacity:.6;font-style:italic;}
+.chat-sug{padding:6px 10px;display:flex;flex-wrap:wrap;gap:4px;border-top:1px solid var(--outline);flex-shrink:0;}
+.sug-chip{padding:4px 8px;border-radius:var(--r-pill);border:1px solid var(--outline);background:var(--bg);cursor:pointer;font-family:var(--font);font-size:10px;color:var(--fg);transition:all var(--t-fast);}
+.sug-chip:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+.chat-inp-row{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--outline);flex-shrink:0;}
+.chat-inp{flex:1;border:1px solid var(--outline);border-radius:var(--r-sm);padding:7px 10px;font-family:var(--font);font-size:12px;color:var(--fg);background:var(--surface);outline:none;resize:none;line-height:1.4;}
+.chat-inp:focus{border-color:var(--primary);}
+.chat-send{padding:7px 12px;background:var(--primary);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer;font-family:var(--font);font-size:12px;font-weight:600;transition:background var(--t-fast);white-space:nowrap;}
+.chat-send:hover{background:var(--primary-d);}
+/* comm-badge on tab */
+.comm-badge{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:var(--danger);color:#fff;font-size:8px;font-weight:800;position:absolute;top:5px;right:4px;line-height:1;}
+/* Insights tab */
+.insight-card{background:var(--bg);border:1px solid var(--outline);border-radius:var(--r-md);padding:11px 12px;margin-bottom:8px;}
+.ic-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:9px;}
+/* Comm tab */
+.comm-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 13px 6px;border-bottom:1px solid var(--outline);flex-shrink:0;}
+.comm-hd-title{font-size:11px;font-weight:700;color:var(--fg);}
+.comm-mark-all{font-size:10px;color:var(--primary);cursor:pointer;background:none;border:none;font-family:var(--font);padding:0;}
+.comm-mark-all:hover{text-decoration:underline;}
+.comm-list{flex:1;overflow-y:auto;padding:6px 0;}
+.comm-list::-webkit-scrollbar{width:4px;}
+.comm-list::-webkit-scrollbar-thumb{background:var(--outline);border-radius:2px;}
+.comm-item{display:flex;align-items:flex-start;gap:9px;padding:9px 13px;cursor:pointer;transition:background var(--t-fast);border-bottom:1px solid rgba(0,0,0,.04);position:relative;}
+.comm-item:hover{background:var(--bg);}
+.comm-item.unread{background:#f0fbfe;}
+.comm-item.unread::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--primary);border-radius:0 2px 2px 0;}
+.comm-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;}
+.comm-avatar.doc{background:linear-gradient(135deg,#0a7a95,#0096b3);}
+.comm-avatar.clinic{background:linear-gradient(135deg,#6366f1,#4f46e5);}
+.comm-avatar.sys{background:linear-gradient(135deg,#16a34a,#15803d);}
+.comm-body{flex:1;min-width:0;}
+.comm-name-row{display:flex;align-items:center;gap:5px;margin-bottom:2px;}
+.comm-name{font-size:12px;font-weight:700;color:var(--fg);}
+.comm-role{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;white-space:nowrap;}
+.comm-role.r-doc{background:#e0f5fa;color:#0a7a95;}
+.comm-role.r-clinic{background:#ede9fe;color:#5b21b6;}
+.comm-role.r-sys{background:var(--success-bg);color:#15803d;}
+.comm-time{font-size:9px;color:var(--muted);margin-left:auto;flex-shrink:0;font-family:var(--mono);}
+.comm-case{font-size:10px;color:var(--muted);margin-bottom:3px;}
+.comm-case strong{color:var(--fg);font-weight:600;}
+.comm-preview{font-size:11px;color:var(--muted);line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.comm-item.unread .comm-preview{color:var(--fg);font-weight:500;}
+.comm-actions{display:flex;gap:5px;margin-top:5px;}
+.comm-act-btn{font-size:9px;padding:2px 7px;border-radius:var(--r-pill);border:1px solid var(--outline);background:transparent;cursor:pointer;font-family:var(--font);color:var(--muted);transition:all var(--t-fast);}
+.comm-act-btn:hover{border-color:var(--primary);color:var(--primary);background:#e0f5fa;}
+.comm-act-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+.comm-act-btn.primary:hover{background:#0096b3;}
+/* 沟通管理 — 按病例区域着色 */
+.comm-item.ci-z-cr{background:#fff0f0;}
+.comm-item.ci-z-cr:hover{background:#ffe4e4;}
+.comm-item.ci-z-cr::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--z-red);border-radius:0 2px 2px 0;}
+.comm-item.ci-z-cr .comm-avatar.doc{background:linear-gradient(135deg,var(--z-red),#b91c1c);}
+.comm-item.ci-z-ur{background:#fffbeb;}
+.comm-item.ci-z-ur:hover{background:#fef3c7;}
+.comm-item.ci-z-ur::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--z-yellow);border-radius:0 2px 2px 0;}
+.comm-item.ci-z-ur .comm-avatar.doc{background:linear-gradient(135deg,var(--z-yellow),#b45309);}
+.zone-pie-row{display:flex;align-items:center;gap:12px;}
+.zone-bars{flex:1;display:flex;flex-direction:column;gap:5px;}
+.zb-row2{display:flex;align-items:center;gap:6px;font-size:10px;}
+.zb-label2{width:20px;font-size:9px;font-weight:700;}
+.zb-bar-bg{flex:1;height:6px;background:var(--outline);border-radius:3px;overflow:hidden;}
+.zb-bar-fill{height:100%;border-radius:3px;}
+.zb-count2{width:14px;text-align:right;font-family:var(--mono);font-size:10px;font-weight:700;}
+.doc-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--outline);font-size:11px;}
+.doc-row:last-child{border-bottom:none;}
+.risk-alert{margin-top:8px;padding:7px 9px;background:#fff1f1;border-radius:6px;border-left:3px solid var(--danger);font-size:10px;color:#b91c1c;line-height:1.5;}
+/* Batch tab */
+.batch-item{background:var(--bg);border:1px solid var(--outline);border-radius:var(--r-md);padding:10px 12px;margin-bottom:6px;}
+.bi-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:6px;}
+.bi-title{font-size:12px;font-weight:700;flex:1;}
+.bi-desc{font-size:10px;color:var(--muted);line-height:1.45;margin-bottom:8px;}
+.bi-btn{padding:5px 11px;border-radius:var(--r-pill);border:none;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:700;transition:all var(--t-fast);}
+.bi-btn-r{background:var(--danger-bg);color:var(--danger);}
+.bi-btn-r:hover{background:var(--danger);color:#fff;}
+.bi-btn-y{background:var(--warn-bg);color:var(--warn);}
+.bi-btn-y:hover{background:var(--warn);color:#fff;}
+.bi-btn-b{background:var(--z-blue-bg);color:var(--z-blue);}
+.bi-btn-b:hover{background:var(--z-blue);color:#fff;}
+.bi-btn-g{background:var(--bg);color:var(--fg);border:1px solid var(--outline);}
+.bi-btn-g:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+.bi-tag{font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700;flex-shrink:0;}
+/* ─── Page views (comm / image-analysis) ─── */
+.page-view{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0;}
+.page-view.active{display:flex;}
+/* Comm page */
+.comm-layout{flex:1;display:flex;overflow:hidden;min-height:0;}
+/* ── LEFT: conversation list ── */
+.comm-list{flex:0 0 240px;border-right:1px solid var(--outline);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);}
+.comm-list-header{padding:12px 14px 8px;border-bottom:1px solid var(--outline);flex-shrink:0;}
+.comm-list-title{font-size:13px;font-weight:700;color:var(--fg);margin-bottom:8px;}
+.comm-detail{flex:1;display:flex;overflow:hidden;min-height:0;}
+.comm-list-toolbar{padding:6px 10px;border-bottom:1px solid var(--outline);display:flex;gap:6px;flex-shrink:0;}
+.comm-search{flex:1;display:flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--outline);border-radius:var(--r-sm);padding:5px 8px;}
+.comm-search input{border:none;outline:none;background:transparent;font-family:var(--font);font-size:12px;color:var(--fg);flex:1;}
+.comm-filter-bar{padding:4px 8px 5px;border-bottom:1px solid var(--outline);display:flex;gap:3px;flex-shrink:0;flex-wrap:wrap;}
+.cf-btn{padding:3px 8px;border-radius:var(--r-pill);border:1px solid var(--outline);background:transparent;font-family:var(--font);font-size:10px;cursor:pointer;color:var(--muted);transition:all var(--t-fast);}
+.cf-btn.on{background:var(--primary);color:#fff;border-color:var(--primary);}
+.comm-scroll{flex:1;overflow-y:auto;padding:5px;}
+.comm-scroll::-webkit-scrollbar{width:4px;}
+.comm-scroll::-webkit-scrollbar-thumb{background:var(--outline);border-radius:2px;}
+/* Conversation cards — redesigned */
+.conv-card{border-radius:var(--r-sm);border:1px solid var(--outline);background:var(--surface);padding:8px 10px 8px 14px;margin-bottom:3px;cursor:pointer;transition:all var(--t-fast);position:relative;overflow:hidden;}
+.conv-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px;}
+.conv-card.cc-r::before{background:var(--z-red);}
+.conv-card.cc-y::before{background:var(--z-yellow);}
+.conv-card.cc-b::before{background:var(--z-blue);}
+.conv-card.active,.conv-card:hover{background:var(--bg);box-shadow:0 2px 8px rgba(15,23,42,.07);}
+.conv-card.active{border-color:var(--primary);}
+.cc-row1{display:flex;align-items:center;gap:5px;margin-bottom:2px;}
+.cc-patient{font-size:12px;font-weight:700;flex:1;color:var(--fg);}
+.cc-time{font-size:10px;color:var(--muted);white-space:nowrap;flex-shrink:0;font-family:var(--mono);}
+.cc-unread-dot{width:7px;height:7px;background:var(--danger);border-radius:50%;flex-shrink:0;}
+.cc-row2{font-size:10px;color:var(--muted);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cc-row3{display:flex;align-items:center;gap:5px;}
+.cc-avatar{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;}
+.cc-r .cc-avatar{background:linear-gradient(135deg,var(--z-red),#b91c1c);}
+.cc-y .cc-avatar{background:linear-gradient(135deg,#d97706,#b45309);}
+.cc-b .cc-avatar{background:linear-gradient(135deg,var(--primary),#1d4ed8);}
+.cc-info{flex:1;min-width:0;}
+.cc-top{display:flex;align-items:baseline;justify-content:space-between;gap:4px;margin-bottom:1px;}
+.cc-title{font-size:11px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cc-sub{font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cc-name{font-size:13px;font-weight:700;display:flex;align-items:baseline;gap:4px;margin-bottom:3px;}
+.cc-name .cc-time{font-size:10px;color:var(--muted);font-weight:400;margin-left:auto;}
+.cc-name .cc-unread{width:7px;height:7px;background:var(--danger);border-radius:50%;display:inline-block;margin-left:2px;vertical-align:middle;}
+.cc-status{margin-top:4px;}
+.cc-unread{width:7px;height:7px;background:var(--danger);border-radius:50%;flex-shrink:0;margin-top:3px;}
+.comm-new-btn{margin:5px 8px;padding:6px;background:var(--primary);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer;font-family:var(--font);font-size:11px;font-weight:600;width:calc(100% - 16px);transition:background var(--t-fast);}
+.comm-new-btn:hover{background:var(--primary-d);}
+/* ── CENTER: chat detail ── */
+.chat-main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+.chat-header{padding:14px 20px;border-bottom:1px solid var(--outline);background:var(--surface);flex-shrink:0;display:flex;align-items:center;gap:14px;}
+.chat-hd-info{flex:1;min-width:0;}
+.chat-hd-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:2px;}
+.chat-hd-sub{font-size:12px;color:var(--muted);margin-top:0;}
+.chat-hd-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:var(--r-pill);white-space:nowrap;}
+.badge-ret{background:var(--danger-bg);color:var(--danger);}
+.badge-susp{background:var(--z-blue-bg);color:#007a96;}
+.chat-hd-sla{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--danger);background:var(--danger-bg);padding:3px 8px;border-radius:var(--r-sm);}
+.chat-messages{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px;}
+.chat-messages::-webkit-scrollbar{width:5px;}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--outline);border-radius:2px;}
+.cmsg{max-width:70%;font-size:13px;line-height:1.6;}
+.cmsg-doc{align-self:flex-start;}
+.cmsg-me{align-self:flex-end;}
+.cmsg-bubble{padding:11px 15px;border-radius:14px;}
+.cmsg-doc .cmsg-bubble{background:var(--surface);border:1px solid var(--outline);border-radius:3px 14px 14px 14px;box-shadow:0 1px 4px rgba(15,23,42,.05);}
+.cmsg-me .cmsg-bubble{background:var(--primary);color:#fff;border-radius:14px 14px 3px 14px;box-shadow:0 2px 8px rgba(0,181,216,.25);}
+.cmsg-meta{font-size:11px;color:var(--muted);margin-bottom:5px;}
+.cmsg-me .cmsg-meta{text-align:right;}
+.ai-translate{margin-top:8px;padding:10px 14px;background:rgba(0,181,216,.06);border-left:3px solid var(--primary);border-radius:0 10px 10px 0;}
+.ai-t-title{font-size:10px;font-weight:700;color:var(--primary);margin-bottom:5px;letter-spacing:.04em;text-transform:uppercase;}
+.ai-t-param{font-size:12px;font-family:var(--mono);color:var(--fg);font-weight:600;padding:2px 0;}
+.ai-t-btns{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.ai-t-btn{padding:4px 11px;border-radius:var(--r-pill);border:1px solid var(--outline);background:var(--surface);font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer;color:var(--fg);transition:all var(--t-fast);}
+.ai-t-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+/* AI Summary panel */
+.chat-ai-summary{flex-shrink:0;border-top:2px solid var(--outline);background:var(--surface);}
+.cas-toggle{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;cursor:pointer;font-size:12px;font-weight:700;}
+.cas-body{padding:0 20px 14px;display:none;}
+.cas-body.open{display:block;}
+.cas-checklist{list-style:none;margin-bottom:8px;}
+.cas-item{font-size:12px;color:var(--muted);padding:5px 0;border-bottom:1px solid var(--outline);display:flex;align-items:flex-start;gap:8px;}
+.cas-item::before{content:'';width:16px;height:16px;border-radius:50%;border:1.5px solid var(--outline);flex-shrink:0;margin-top:1px;}
+.cas-item:last-child{border-bottom:none;}
+.cas-stat{font-size:11px;font-weight:600;margin-top:8px;color:var(--danger);padding:6px 10px;background:var(--danger-bg);border-radius:var(--r-sm);}
+/* Chat input area — compact single-row */
+.chat-input-area{padding:8px 16px 10px;border-top:1px solid var(--outline);background:var(--surface);flex-shrink:0;}
+.chat-input-toolbar{display:none;}
+.chat-input-hint{display:none;}
+.chat-input-row{display:flex;gap:6px;align-items:flex-end;}
+.chat-input-area textarea{flex:1;border:1.5px solid var(--outline);border-radius:var(--r-md);padding:7px 12px;font-family:var(--font);font-size:13px;color:var(--fg);background:var(--bg);outline:none;resize:none;line-height:1.4;min-height:36px;max-height:100px;transition:border-color var(--t-fast);}
+.chat-input-area textarea:focus{border-color:var(--primary);}
+.chat-send-btn{padding:7px 16px;background:var(--primary);color:#fff;border:none;border-radius:var(--r-md);cursor:pointer;font-family:var(--font);font-size:13px;font-weight:700;white-space:nowrap;transition:background var(--t-fast);align-self:flex-end;}
+.chat-send-btn:hover{background:var(--primary-d);}
+.attach-btn{width:32px;height:32px;border-radius:var(--r-sm);border:1.5px solid var(--outline);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all var(--t-fast);flex-shrink:0;align-self:flex-end;}
+.attach-btn:hover{background:var(--bg);color:var(--fg);}
+/* ── RIGHT: case context sidebar — redesigned ── */
+.case-sidebar{width:260px;flex-shrink:0;border-left:1px solid var(--outline);background:var(--surface);display:flex;flex-direction:column;overflow-y:auto;}
+.case-sidebar::-webkit-scrollbar{width:4px;}
+.case-sidebar::-webkit-scrollbar-thumb{background:var(--outline);border-radius:2px;}
+.csb-section{padding:14px 16px;border-bottom:1px solid var(--outline);}
+.csb-section:last-child{border-bottom:none;}
+.csb-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:10px;}
+.csb-card{background:var(--bg);border:1px solid var(--outline);border-radius:var(--r-md);overflow:hidden;}
+.csb-row{font-size:12px;padding:7px 12px;display:flex;align-items:baseline;gap:6px;border-bottom:1px solid var(--outline);}
+.csb-row:last-child{border-bottom:none;}
+.csb-lbl{color:var(--muted);font-size:11px;flex-shrink:0;width:36px;}
+.csb-val{font-weight:600;flex:1;}
+.csb-sla{font-family:var(--mono);font-size:13px;font-weight:800;color:var(--danger);animation:blink 1.4s ease-in-out infinite;}
+.csb-actions{display:flex;flex-direction:column;gap:6px;margin-top:12px;}
+.csb-btn{width:100%;padding:9px;background:var(--primary);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer;font-family:var(--font);font-size:12px;font-weight:700;transition:background var(--t-fast);text-align:center;}
+.csb-btn:hover{background:var(--primary-d);}
+.csb-btn-sec{width:100%;padding:8px;background:transparent;color:var(--fg);border:1.5px solid var(--outline);border-radius:var(--r-sm);cursor:pointer;font-family:var(--font);font-size:12px;font-weight:600;transition:all var(--t-fast);text-align:center;}
+.csb-btn-sec:hover{border-color:var(--primary);color:var(--primary);}
+.ver-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--outline);}
+.ver-row:last-child{border-bottom:none;}
+.ver-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;}
+.vb-curr{background:var(--z-blue-bg);color:#007a96;}
+.vb-old{background:var(--bg);color:var(--muted);}
+.ver-name{font-size:12px;flex:1;color:var(--muted);}
+.ver-name.curr{color:var(--fg);font-weight:600;}
+/* modification checklist in sidebar */
+.mod-item{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--outline);font-size:12px;}
+.mod-item:last-child{border-bottom:none;}
+.mod-check{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--outline);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;cursor:pointer;}
+.mod-check.done{background:var(--primary);border-color:var(--primary);color:#fff;}
+.mod-text{flex:1;line-height:1.4;color:var(--fg);}
+.mod-text.done{text-decoration:line-through;color:var(--muted);}
+.csb-risk-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:var(--r-pill);font-size:11px;font-weight:700;background:var(--warn-bg);color:var(--warn);margin-top:8px;}
+/* ─── Image Analysis page ─── */
+.ia-toolbar{padding:10px 22px;display:flex;align-items:center;gap:8px;flex-shrink:0;border-bottom:1px solid var(--outline);background:var(--surface);}
+.ia-layout{flex:1;display:flex;overflow:hidden;min-height:0;}
+.ia-main{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:16px 22px 80px;}
+.ia-main::-webkit-scrollbar{width:5px;}
+.ia-main::-webkit-scrollbar-thumb{background:var(--outline);border-radius:2px;}
+.ia-section-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.img-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.img-frame{background:var(--surface);border:1px solid var(--outline);border-radius:var(--r-lg);overflow:hidden;}
+.img-frame-label{padding:8px 12px;border-bottom:1px solid var(--outline);font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;}
+.img-placeholder{height:220px;background:var(--bg);display:flex;align-items:center;justify-content:center;position:relative;}
+.img-placeholder svg{opacity:.25;}
+.img-annotation{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.ann-r{border:2px dashed var(--danger);}
+.ann-y{border:2px dashed var(--warn);}
+.ann-g{border:2px solid var(--success);}
+.img-legend{display:flex;gap:12px;font-size:11px;margin-bottom:16px;}
+.legend-item{display:flex;align-items:center;gap:5px;}
+.legend-dot{width:10px;height:10px;border-radius:50%;}
+.ai-suggest-card{background:var(--surface);border:1px solid var(--outline);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:8px;}
+.asc-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;}
+.asc-num{width:22px;height:22px;border-radius:50%;background:var(--primary);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.asc-body{flex:1;}
+.asc-title{font-size:13px;font-weight:700;margin-bottom:2px;}
+.asc-template{font-size:11px;color:var(--muted);}
+.asc-steps{font-size:11px;color:var(--fg);line-height:1.6;padding:7px 10px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:8px;}
+.asc-btns{display:flex;gap:6px;}
+.asc-btn{padding:5px 12px;border-radius:var(--r-pill);border:1px solid var(--outline);background:var(--surface);font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer;color:var(--fg);transition:all var(--t-fast);}
+.asc-btn.prim{background:var(--primary);color:#fff;border-color:var(--primary);}
+.asc-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+.template-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:16px;}
+.tpl-card{background:var(--surface);border:1px solid var(--outline);border-radius:var(--r-md);padding:10px;transition:box-shadow var(--t-fast);position:relative;}
+.tpl-card:hover{box-shadow:0 3px 12px rgba(15,23,42,.09);}
+.tpl-thumb{height:68px;background:var(--bg);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;margin-bottom:7px;}
+.tpl-id{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:2px;}
+.tpl-name{font-size:12px;font-weight:700;margin-bottom:4px;}
+.tpl-tag{font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;background:var(--z-blue-bg);color:#007a96;}
+.tpl-star{position:absolute;top:7px;right:7px;font-size:12px;}
+.tpl-apply{width:100%;margin-top:7px;padding:5px;background:var(--primary);color:#fff;border:none;border-radius:var(--r-pill);font-family:var(--font);font-size:10px;font-weight:700;cursor:pointer;transition:background var(--t-fast);}
+.tpl-apply:hover{background:var(--primary-d);}
+.ia-bottom-bar{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--outline);padding:10px 22px;display:flex;gap:8px;margin:-80px -22px 0;flex-shrink:0;}
+/* Right analysis panel */
+.ia-result{width:320px;flex-shrink:0;border-left:1px solid var(--outline);background:var(--surface);display:flex;flex-direction:column;overflow:hidden;}
+.ia-result-hd{padding:11px 14px;border-bottom:1px solid var(--outline);background:linear-gradient(135deg,#0a7a95 0%,#0096b3 100%);}
+.ia-result-title{font-size:12px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px;}
+.ia-result-scroll{flex:1;overflow-y:auto;padding:12px 14px;}
+.ia-result-scroll::-webkit-scrollbar{width:4px;}
+.ia-result-scroll::-webkit-scrollbar-thumb{background:var(--outline);border-radius:2px;}
+.ia-prob-item{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:var(--r-sm);margin-bottom:6px;border:1px solid var(--outline);}
+.ia-prob-item.ia-r{background:#fff8f8;border-color:rgba(220,38,38,.2);}
+.ia-prob-item.ia-y{background:#fffef5;border-color:rgba(217,119,6,.2);}
+.ia-dot{width:8px;height:8px;border-radius:50%;margin-top:3px;flex-shrink:0;}
+.ia-prob-body{flex:1;}
+.ia-prob-title{font-size:12px;font-weight:700;margin-bottom:2px;}
+.ia-prob-detail{font-size:11px;color:var(--muted);}
+.step-item{display:flex;gap:10px;padding:8px 10px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:5px;}
+.step-num{width:20px;height:20px;border-radius:50%;background:var(--primary);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.step-body{flex:1;font-size:12px;}
+.step-title{font-weight:700;margin-bottom:2px;}
+.step-detail{color:var(--muted);font-size:11px;}
+.ia-result-footer{padding:12px 14px;border-top:1px solid var(--outline);display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
+.ia-prim-btn{padding:9px;background:var(--primary);color:#fff;border:none;border-radius:var(--r-pill);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:background var(--t-fast);}
+.ia-prim-btn:hover{background:var(--primary-d);}
+.ia-sec-btn{padding:8px;background:var(--bg);color:var(--fg);border:1px solid var(--outline);border-radius:var(--r-pill);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;transition:all var(--t-fast);}
+.ia-sec-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+/* Template library modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:9990;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--surface);border-radius:var(--r-xl);width:700px;max-width:92vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:var(--sh-float);overflow:hidden;}
+.modal-hd{padding:16px 20px;border-bottom:1px solid var(--outline);display:flex;align-items:center;gap:12px;flex-shrink:0;background:linear-gradient(135deg,#0a7a95 0%,#0096b3 100%);}
+.modal-title{font-size:14px;font-weight:700;color:#fff;flex:1;}
+.modal-search{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);border-radius:var(--r-sm);padding:6px 11px;min-width:180px;}
+.modal-search input{border:none;outline:none;background:transparent;font-family:var(--font);font-size:12px;color:#fff;width:140px;}
+.modal-search input::placeholder{color:rgba(255,255,255,.6);}
+.modal-close{width:30px;height:30px;border-radius:8px;border:none;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background var(--t-fast);}
+.modal-close:hover{background:rgba(255,255,255,.25);}
+.modal-filter{padding:10px 20px;border-bottom:1px solid var(--outline);display:flex;gap:6px;flex-shrink:0;}
+.modal-body{flex:1;overflow-y:auto;padding:16px 20px;}
+.modal-body::-webkit-scrollbar{width:5px;}
+.modal-body::-webkit-scrollbar-thumb{background:var(--outline);border-radius:2px;}
+.modal-tpl-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.view-mode-toggle{display:flex;background:var(--surface);border:1px solid var(--outline);border-radius:var(--r-md);padding:3px;}
+.vmt-btn{padding:4px 11px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;color:var(--muted);transition:all var(--t-fast);}
+.vmt-btn.on{background:var(--primary);color:#fff;}
+.ia-import-btn{display:flex;align-items:center;gap:5px;color:var(--primary);border-color:var(--primary);font-weight:600;}
+.ia-import-btn:hover{background:color-mix(in oklab,var(--primary),transparent 92%);}
+.ia-new-btn{display:flex;align-items:center;gap:5px;background:var(--primary);color:#fff;border-color:var(--primary);font-weight:600;}
+.ia-new-btn:hover{background:var(--primary-d,#0097b3);border-color:var(--primary-d,#0097b3);}
+</style>
+</head>
+<body>
+<div class="shell">
+<nav class="sidebar">
+  <div class="s-logo">悦</div>
+  <div class="s-nav">
+    <div class="s-item active" id="nav-workbench" title="工作台" onclick="switchPage('workbench')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>工作台
+    </div>
+    <div class="s-item" id="nav-comm" title="沟通协作" onclick="switchPage('comm')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>沟通
+    </div>
+    <div class="s-item" id="nav-image" title="AI图像分析" onclick="switchPage('image')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/><circle cx="12" cy="12" r="2.5"/></svg>图像
+    </div>
+    <div class="s-item" id="nav-stats" title="数据统计" onclick="toast('📊 数据统计页面即将上线')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>统计
+    </div>
+    <div class="s-item" id="nav-settings" title="设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>设置
+    </div>
+  </div>
+  <div class="s-bottom">
+    <div class="s-item" onclick="showSC()" style="font-size:8px" title="快捷键">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>快捷键
+    </div>
+  </div>
+</nav>
+<div class="main">
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="8" cy="11" r="5.5" stroke="#00B4D8" stroke-width="2.2" fill="none"/>
+          <circle cx="14" cy="11" r="5.5" stroke="#00B4D8" stroke-width="2.2" fill="none"/>
+        </svg>
+      </span>
+      <span class="brand-yp">悦排</span>
+      <span class="brand-divider"></span>
+      <span class="brand-product">
+        <span class="brand-prod-name">正畸方案设计工作台</span>
+        <span class="brand-by">by Linkedcare 领健</span>
+      </span>
+    </div>
+    <div class="h-stats">
+      <div class="stat"><span class="stat-lbl">今日处理</span><span class="stat-val" id="s-done">12 / 35</span></div>
+      <div class="stat"><span class="stat-lbl">平均时效</span><span class="stat-val">18 分钟</span></div>
+      <div class="stat"><span class="stat-lbl">SLA达成率</span><span class="stat-val g">95.2%</span></div>
+    </div>
+    <div class="h-actions">
+      <button class="icon-btn" title="通知">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="badge"></span>
+      </button>
+      <div class="avatar" style="width:30px;height:30px;font-size:11px;">薇</div>
+    </div>
+  </header>
+  <div class="content">
+  <!-- ═══ PAGE: 工作台 ═══ -->
+  <div id="page-workbench" class="page-view active">
+    <div class="zone-bar">
+      <span class="zb-lbl">区域筛选</span>
+      <div class="z-chip cr" data-zone="cr" onclick="fz('cr')"><span class="z-dot d-r pulse"></span>🔴 红区 <strong id="cnt-cr">3</strong></div>
+      <div class="z-chip ur" data-zone="ur" onclick="fz('ur')"><span class="z-dot d-y"></span>🟡 黄区 <strong id="cnt-ur">5</strong></div>
+      <div class="z-chip pe" data-zone="pe" onclick="fz('pe')"><span class="z-dot d-b"></span>🔵 蓝区 <strong id="cnt-pe">2</strong></div>
+      <div class="z-chip pa" data-zone="pa" onclick="fz('pa')"><span class="z-dot d-g"></span>⚪ 灰区 <strong id="cnt-pa">2</strong></div>
+      <button id="zb-clear" class="zb-clear-btn" onclick="clearFilter()" style="display:none">✕ 取消筛选</button>
+      <div class="zb-right" id="refresh-status">⟳ 30s 后刷新</div>
+    </div>
+    <div class="toolbar">
+      <div class="search">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="srch" placeholder="搜索病例编号、患者、诊所、医生…" oninput="doSearch(this.value)">
+      </div>
+      <button class="tb-btn" onclick="toast('🔽 筛选面板暂未开放')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>筛选</button>
+      <button class="tb-btn" onclick="toast('⇅ 当前：AI紧急度排序（默认）')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>AI紧急度 ▾</button>
+      <div class="tb-sep"></div>
+      <div class="view-toggle">
+        <div class="vbtn on" id="vAI" onclick="swView('ai')">AI视图</div>
+        <div class="vbtn" id="vTab" onclick="swView('tab')">Tab视图</div>
+      </div>
+    </div>
+    <div class="split-area">
+    <div class="list-area">
+    <div class="ai-view" id="aiView">
+      <div class="fc-wrap">
+        <div class="fc">
+          <div class="fc-head">
+            <span class="fc-greet">👋 陈薇，早上好</span>
+            <div class="fc-actions">
+              <span class="fc-date" id="fc-date"></span>
+              <button class="fc-cbtn" id="fc-toggle" onclick="toggleFC()">收起 ▲</button>
+            </div>
+          </div>
+          <div id="fc-body">
+            <div class="fc-alert" id="fc-alert">
+              <span class="fc-al-lbl" id="fc-al-lbl">🔴 立即处理</span>
+              <span class="fc-al-case" id="fc-al-case"></span>
+              <span class="fc-al-sla" id="fc-sla"></span>
+            </div>
+            <div class="fc-meta">
+              <span>今日任务：<strong>35 件</strong></span>
+              <span>已完成：<strong id="fc-done-cnt">12 件</strong></span>
+              <span>建议顺序：<strong id="fc-order">红3 → 黄5 → 蓝2</strong></span>
+            </div>
+            <div class="fc-hint">💡 上午策略：先清红区（约 45min），午后推进黄区</div>
+          </div>
+        </div>
+      </div>
+      <div class="cl-wrap">
+        <div class="cl-thead">
+          <span class="ch-id">病例 ID</span>
+          <span class="ch-patient">患者信息</span>
+          <span class="ch-summary">状态摘要</span>
+          <span class="ch-sla">剩余时效</span>
+          <span class="ch-action">操作</span>
+        </div>
+        <div class="case-scroll" id="mainContent"><div id="cl"></div></div>
+      </div>
+    </div>
+    <div class="tab-view" id="tabView">
+      <div class="tab-nav">
+        <div class="tn-item on" data-tz="all" onclick="switchTab('all')">全部</div>
+        <div class="tn-item" data-tz="cr" onclick="switchTab('cr')">🔴 红区 <span id="tcnt-cr">3</span></div>
+        <div class="tn-item" data-tz="ur" onclick="switchTab('ur')">🟡 黄区 <span id="tcnt-ur">5</span></div>
+        <div class="tn-item" data-tz="pe" onclick="switchTab('pe')">🔵 蓝区 <span id="tcnt-pe">2</span></div>
+        <div class="tn-item" data-tz="pa" onclick="switchTab('pa')">⚪ 灰区 <span id="tcnt-pa">2</span></div>
+      </div>
+      <div class="tab-body" id="tabBody"></div>
+    </div>
+    </div><!-- /list-area -->
+    <!-- ── AI Assistant Panel ── -->
+    <div class="ai-panel" id="aiPanel">
+  <!-- floating handle shown when collapsed -->
+  <div class="aip-trigger" onclick="toggleAIPanel()" title="展开 AI 助手">
+    <div class="aip-trigger-icon">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M9 9h.01M15 9h.01M9 15h6"/></svg>
+    </div>
+    <span class="aip-trigger-label">AI 助手</span>
+  </div>
+  <div class="aip-hd">
+    <span class="aip-hd-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M9 9h.01M15 9h.01M9 15h6"/></svg>
+      悦排 AI 助手
+    </span>
+    <span class="aip-badge">Beta</span>
+    <button class="aip-collapse-btn" onclick="toggleAIPanel()" title="收起 AI 面板">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+  </div>
+  <div class="aip-tabs">
+    <button class="apt on" data-aip="plan" onclick="switchAIP('plan')">今日规划</button>
+    <button class="apt" data-aip="chat" onclick="switchAIP('chat')">智能问答</button>
+    <button class="apt" data-aip="insights" onclick="switchAIP('insights')" style="position:relative">沟通管理<span class="comm-badge">1</span></button>
+    <button class="apt" data-aip="batch" onclick="switchAIP('batch')">批量操作</button>
+  </div>
+  <div class="aip-content">
+    <!-- Tab 1: 今日规划 -->
+    <div class="aip-tab on" id="aip-plan">
+      <div class="aip-scroll" id="plan-scroll">
+        <div style="text-align:center;padding:30px;color:var(--muted);font-size:12px">加载规划中…</div>
+      </div>
+    </div>
+    <!-- Tab 2: 智能问答 -->
+    <div class="aip-tab" id="aip-chat">
+      <div class="chat-msgs" id="chatMsgs">
+        <div class="msg ai"><div class="msg-tag">🤖 AI 助手</div>你好，陈薇！我是悦排AI助手，可以帮你分析病例优先级、查询医生退回数据、制定今日工作策略。<br><br>有什么可以帮你的吗？</div>
+      </div>
+      <div class="chat-sug">
+        <span class="sug-chip" onclick="aiAsk('今天最紧急的病例是哪个？')">最紧急病例</span>
+        <span class="sug-chip" onclick="aiAsk('王医生的退回率是多少？')">王医生退回率</span>
+        <span class="sug-chip" onclick="aiAsk('张明的退回原因是什么？')">张明退回原因</span>
+        <span class="sug-chip" onclick="aiAsk('今天能完成多少件？')">今天完成预测</span>
+        <span class="sug-chip" onclick="aiAsk('灰区病例怎么处理？')">灰区处理建议</span>
+        <span class="sug-chip" onclick="aiAsk('哪个诊所问题最多？')">诊所风险排名</span>
+      </div>
+      <div class="chat-inp-row">
+        <textarea class="chat-inp" id="chatInput" placeholder="问我关于病例、医生、策略的任何问题…" rows="1" onkeydown="chatKeydown(event)"></textarea>
+        <button class="chat-send" onclick="chatSend()">发送</button>
+      </div>
+    </div>
+    <!-- Tab 3: 沟通管理 -->
+    <div class="aip-tab" id="aip-insights" style="display:none;flex-direction:column;overflow:hidden;">
+      <div style="padding:8px 12px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--outline);">
+        <span style="font-size:11px;font-weight:700;color:var(--fg);">消息 <span id="unread-badge-mini" style="color:var(--danger);">· 1 条未读</span></span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button style="font-size:10px;color:var(--primary);background:none;border:none;cursor:pointer;font-family:var(--font);padding:0;" onclick="switchPage('comm')">查看全部 →</button>
+        </div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:4px 0;">
+        <!-- 未读 -->
+        <div id="mini-msg-001234" class="comm-item unread ci-z-cr" onclick="switchPage('comm');toast('💬 已跳转至在线沟通')">
+          <div class="comm-avatar doc">王</div>
+          <div class="comm-body">
+            <div class="comm-header">
+              <span class="comm-name">王医生</span>
+              <span class="comm-case">· <strong>#001234</strong> 张明</span>
+              <span class="comm-time">14:32</span>
+            </div>
+            <div class="comm-preview">「11和21压低量不够，附件位置也不对，请重新调整」</div>
+            <div class="comm-actions">
+              <button class="comm-act-btn" onclick="event.stopPropagation();switchPage('comm');toast('💬 已跳转至在线沟通')">立即回复</button>
+              <button class="comm-act-btn" onclick="event.stopPropagation();handleCommClick('001234')">标记已读</button>
+            </div>
+          </div>
+        </div>
+        <!-- 已读 -->
+        <div class="comm-item ci-z-ur" onclick="switchPage('comm');toast('💬 已跳转至在线沟通')">
+          <div class="comm-avatar doc">赵</div>
+          <div class="comm-body">
+            <div class="comm-header">
+              <span class="comm-name">赵医生</span>
+              <span class="comm-case">· <strong>#001198</strong> 李晓燕</span>
+              <span class="comm-time">13:05</span>
+            </div>
+            <div class="comm-preview">咬合垫高度可以，垂直向控制再注意一下</div>
+            <div class="comm-actions">
+              <button class="comm-act-btn" onclick="event.stopPropagation();switchPage('comm')">回复</button>
+              <button class="comm-act-btn" onclick="event.stopPropagation();switchPage('image');toast('🔬 已跳转至图像分析')">图像对比</button>
+            </div>
+          </div>
+        </div>
+        <div class="comm-item ci-z-ur" onclick="switchPage('comm');toast('💬 已跳转至在线沟通')">
+          <div class="comm-avatar doc">刘</div>
+          <div class="comm-body">
+            <div class="comm-header">
+              <span class="comm-name">刘医生</span>
+              <span class="comm-case">· <strong>#001256</strong> 王大海</span>
+              <span class="comm-time">11:47</span>
+            </div>
+            <div class="comm-preview">16远中移动只有2mm，需至少3.5mm，重新规划</div>
+            <div class="comm-actions">
+              <button class="comm-act-btn" onclick="event.stopPropagation();switchPage('comm')">回复</button>
+            </div>
+          </div>
+        </div>
+        <div class="comm-item" onclick="switchPage('comm');toast('💬 已跳转至在线沟通')">
+          <div class="comm-avatar doc">孙</div>
+          <div class="comm-body">
+            <div class="comm-header">
+              <span class="comm-name">孙医生</span>
+              <span class="comm-case">· <strong>#001267</strong> 陈思思</span>
+              <span class="comm-time">10:20</span>
+            </div>
+            <div class="comm-preview">局部矫治范围只到第一磨牙，前牙段需要补充</div>
+            <div class="comm-actions">
+              <button class="comm-act-btn" onclick="event.stopPropagation();switchPage('comm')">回复</button>
+            </div>
+          </div>
+        </div>
+        <div class="comm-item" onclick="toast('ℹ️ 今日工作台概览：红区3件、黄区5件，请优先处理红区')">
+          <div class="comm-avatar" style="background:linear-gradient(135deg,#94a3b8,#64748b);font-size:9px;">系统</div>
+          <div class="comm-body">
+            <div class="comm-header">
+              <span class="comm-name">系统通知</span>
+              <span class="comm-time">09:00</span>
+            </div>
+            <div class="comm-preview">今日工作台概览：红区3件需在SLA前完成，黄区5件待处理</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:8px 12px;border-top:1px solid var(--outline);flex-shrink:0;">
+        <button onclick="switchPage('comm')" style="width:100%;padding:7px;background:linear-gradient(135deg,#0a7a95,#0096b3);color:#fff;border:none;border-radius:var(--r-sm);font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer;">进入沟通页面 →</button>
+      </div>
+    </div>
+    <!-- Tab 4: 批量操作 -->
+    <div class="aip-tab" id="aip-batch">
+      <div class="aip-scroll">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;padding:8px 10px;background:var(--bg);border-radius:var(--r-sm);border:1px solid var(--outline);line-height:1.5">
+          💡 AI 根据当前工作台状态推荐以下批量操作，一键执行可节省约 <strong style="color:var(--fg)">8 分钟</strong>
+        </div>
+        <div class="batch-item">
+          <div class="bi-head">
+            <span class="bi-title">🔴 一键催办所有灰区病例</span>
+            <span class="bi-tag" style="background:var(--danger-bg);color:var(--danger)">紧急</span>
+          </div>
+          <div class="bi-desc">郑志强（缺失 2 天，必需：右侧咬合像）和马美玲（缺失 1 天，建议：CBCT）均无响应。AI建议立即批量发送催办消息并抄送诊所负责人。</div>
+          <button class="bi-btn bi-btn-r" onclick="batchAct('一键催办所有灰区病例', '📨 已向郑志强、马美玲的诊所发送催办消息，并抄送诊所负责人')">催办 2 件灰区</button>
+        </div>
+        <div class="batch-item">
+          <div class="bi-head">
+            <span class="bi-title">🟡 生成黄区下午排班表</span>
+            <span class="bi-tag" style="background:var(--warn-bg);color:var(--warn)">推荐</span>
+          </div>
+          <div class="bi-desc">5件黄区病例按SLA紧急度排序后，预计今日下午可全部完成。AI可生成排班表并发送至邮箱，附上每件的预计工时和注意事项。</div>
+          <button class="bi-btn bi-btn-y" onclick="batchAct('生成黄区下午排班表', '📊 黄区排班表已生成并发送至 chen.wei@linkedcare.cn')">生成排班表</button>
+        </div>
+        <div class="batch-item">
+          <div class="bi-head">
+            <span class="bi-title">🔵 蓝区批量发送确认提醒</span>
+            <span class="bi-tag" style="background:var(--z-blue-bg);color:var(--z-blue)">常规</span>
+          </div>
+          <div class="bi-desc">孙宇航（冯医生）和周丽华（陈医生）的方案均已提交，可通过系统统一发送确认提醒，无需逐个操作。</div>
+          <button class="bi-btn bi-btn-b" onclick="batchAct('蓝区批量发送确认提醒', '✅ 已向冯医生、陈医生发送方案确认提醒')">提醒 2 位医生</button>
+        </div>
+        <div class="batch-item">
+          <div class="bi-head">
+            <span class="bi-title">⚠️ 高风险医生预沟通</span>
+            <span class="bi-tag" style="background:var(--warn-bg);color:var(--warn)">推荐</span>
+          </div>
+          <div class="bi-desc">涉及★医生（王医生、周医生、林医生）的病例退回风险高。AI可批量生成预沟通消息草稿，附上关键参数，发送给医生提前确认。</div>
+          <button class="bi-btn bi-btn-y" onclick="batchAct('高风险医生预沟通', '💬 已生成3份预沟通草稿，请在消息中心确认后发送')">生成沟通草稿</button>
+        </div>
+        <div class="batch-item">
+          <div class="bi-head">
+            <span class="bi-title">📊 生成今日工作报告</span>
+            <span class="bi-tag" style="background:var(--bg);color:var(--muted);border:1px solid var(--outline)">导出</span>
+          </div>
+          <div class="bi-desc">汇总今日处理件数、SLA达成率、退回原因分析、高风险医生列表。生成PDF工作报告，可发送给主管或存档。</div>
+          <button class="bi-btn bi-btn-g" onclick="batchAct('生成今日工作报告', '📄 今日工作报告生成中，预计30秒后发送至邮箱')">生成报告</button>
+        </div>
+      </div>
+    </div><!-- /aip-tab batch -->
+  </div><!-- /aip-content -->
+</div><!-- /ai-panel -->
+    </div><!-- /split-area -->
+  </div><!-- /page-workbench -->
+
+  <!-- ═══ PAGE: 沟通协作 ═══ -->
+  <div id="page-comm" class="page-view">
+    <div class="comm-layout">
+      <!-- LEFT: conversation list -->
+      <div class="comm-list">
+        <div class="comm-list-toolbar">
+          <div class="comm-search">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="搜索病例或患者…">
+          </div>
+        </div>
+        <div class="comm-filter-bar">
+          <button class="cf-btn on">全部</button>
+          <button class="cf-btn" onclick="toast('🔍 筛选：待回复')">待回复</button>
+          <button class="cf-btn" onclick="toast('✅ 已关闭')">已关闭</button>
+        </div>
+        <div class="comm-scroll">
+          <!-- 红区 - 退回中，未读 -->
+          <div class="conv-card cc-r active">
+            <div class="cc-row1">
+              <span class="cc-patient">张明</span>
+              <span class="cc-time">09:47</span>
+              <span class="cc-unread-dot"></span>
+            </div>
+            <div class="cc-row2">#001234 · 王医生 · 韶华口腔</div>
+            <div class="cc-row3">
+              <span class="tag t-r">退回中</span>
+              <span style="font-size:10px;color:var(--danger);font-family:var(--mono);font-weight:700;margin-left:auto">SLA 01:25</span>
+            </div>
+          </div>
+          <!-- 黄区 - 审核中 -->
+          <div class="conv-card cc-y" onclick="toast('已切换至李晓燕对话')">
+            <div class="cc-row1">
+              <span class="cc-patient">李晓燕</span>
+              <span class="cc-time">08:55</span>
+            </div>
+            <div class="cc-row2">#001198 · 赵医生 · 美丽口腔</div>
+            <div class="cc-row3">
+              <span class="tag t-o">待审核</span>
+              <span style="font-size:10px;color:var(--warn);font-family:var(--mono);font-weight:700;margin-left:auto">SLA 03:10</span>
+            </div>
+          </div>
+          <!-- 蓝区 - 待确认 -->
+          <div class="conv-card cc-b" onclick="toast('已切换至孙宇航对话')">
+            <div class="cc-row1">
+              <span class="cc-patient">孙宇航</span>
+              <span class="cc-time">昨天</span>
+            </div>
+            <div class="cc-row2">#001256 · 冯医生 · 精工口腔</div>
+            <div class="cc-row3">
+              <span class="tag t-g">待确认</span>
+            </div>
+          </div>
+          <!-- 蓝区 -->
+          <div class="conv-card cc-b" onclick="toast('已切换至陈思思对话')">
+            <div class="cc-row1">
+              <span class="cc-patient">陈思思</span>
+              <span class="cc-time">昨天</span>
+            </div>
+            <div class="cc-row2">#001267 · 孙医生 · 优质口腔</div>
+            <div class="cc-row3">
+              <span class="tag t-b">进行中</span>
+            </div>
+          </div>
+        </div>
+        <button class="comm-new-btn" onclick="toast('✅ 新建沟通会话已创建')">+ 新建沟通</button>
+      </div>
+
+      <!-- CENTER + RIGHT: chat detail -->
+      <div class="comm-detail">
+        <div class="chat-main">
+          <!-- Chat header -->
+          <div class="chat-header">
+            <div class="chat-hd-info">
+              <div class="chat-hd-title">
+                <span class="zn-badge zn-cr"><span class="zn-dot"></span>红1</span>
+                张明 &nbsp;<span style="color:var(--muted);font-weight:400">#001234</span>&nbsp;· 王医生（韶华口腔）
+              </div>
+              <div class="chat-hd-sub">骨性三类 · 拔牙方案 · 退回待确认 · 修改 3 项待处理</div>
+            </div>
+            <span class="chat-hd-sla">SLA 01:25</span>
+            <span class="chat-hd-badge badge-ret">退回意见</span>
+            <button class="tb-btn" onclick="toast('📎 附件：V1方案图.pdf, V2截图.png')">📎 附件</button>
+          </div>
+
+          <!-- Messages -->
+          <div class="chat-messages">
+            <div class="cmsg cmsg-doc">
+              <div class="cmsg-meta">王医生（韶华口腔）· 09:32</div>
+              <div class="cmsg-bubble">「11和21再往里收一下，大概半个毫米吧，感觉现在有点外扩了」</div>
+              <div class="ai-translate">
+                <div class="ai-t-title">AI 实时转译</div>
+                <div class="ai-t-param">✦ 内收 11、21（−0.5mm）</div>
+                <div class="ai-t-btns">
+                  <button class="ai-t-btn" onclick="toast('✅ 参数已复制：内收 11/21 −0.5mm')">一键复制参数</button>
+                  <button class="ai-t-btn" onclick="toast('📋 已同步至修改清单')">加入修改清单</button>
+                </div>
+              </div>
+            </div>
+            <div class="cmsg cmsg-me">
+              <div class="cmsg-meta">陈薇（我）· 09:38</div>
+              <div class="cmsg-bubble">「好的，已理解，内收0.5mm。16的远中移动也需要确认吗？」</div>
+            </div>
+            <div class="cmsg cmsg-doc">
+              <div class="cmsg-meta">王医生（韶华口腔）· 09:45</div>
+              <div class="cmsg-bubble">「对，16大概往后移1到1.5毫米，另外13和23这两个牙需要加附件」</div>
+              <div class="ai-translate">
+                <div class="ai-t-title">AI 实时转译</div>
+                <div class="ai-t-param">✦ 远中移动 16（−1.0 ～ −1.5mm）</div>
+                <div class="ai-t-param">✦ 增加 13、23 附件（新增，V1 无）</div>
+                <div class="ai-t-btns">
+                  <button class="ai-t-btn" onclick="toast('✅ 参数已复制')">一键复制参数</button>
+                  <button class="ai-t-btn" onclick="toast('📋 已同步至修改清单，共3项')">加入修改清单</button>
+                </div>
+              </div>
+            </div>
+            <div class="cmsg cmsg-me">
+              <div class="cmsg-meta">陈薇（我）· 09:47</div>
+              <div class="cmsg-bubble">「好的，三项修改已记录，预计今天中午前提交」</div>
+            </div>
+          </div>
+
+          <!-- AI Summary (collapsible) -->
+          <div class="chat-ai-summary">
+            <div class="cas-toggle" onclick="document.getElementById('casBody').classList.toggle('open')">
+              <span>🤖 AI 沟通摘要 &nbsp;<span style="font-size:11px;color:var(--muted);font-weight:400">本次退回涉及修改 3 项，V1 对比新增 1 项</span></span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="cas-body open" id="casBody">
+              <div class="cas-item">① 内收 11、21（−0.5mm）</div>
+              <div class="cas-item">② 远中移动 16（−1.5mm）</div>
+              <div class="cas-item">③ 增加 13、23 附件（新增，V1 无此项）</div>
+              <div class="cas-stat">⚠ 王医生历史退回率 67%，建议提交前发参数预确认</div>
+              <button class="ai-t-btn" style="margin-top:10px" onclick="toast('📝 预确认消息草稿已生成，请在输入框中确认后发送')">生成预确认草稿</button>
+            </div>
+          </div>
+
+          <!-- Input area -->
+          <div class="chat-input-area">
+            <div class="chat-input-toolbar">
+              <span class="chat-input-hint">输入 @AI 让 AI 帮你起草回复</span>
+              <button class="attach-btn" onclick="toast('📎 上传附件（支持图片/PDF）')" title="上传附件">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+              </button>
+            </div>
+            <div class="chat-input-row">
+              <textarea placeholder="输入消息…" rows="2"></textarea>
+              <button class="chat-send-btn" onclick="toast('✅ 消息已发送')">发送</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: case context sidebar -->
+        <div class="case-sidebar">
+          <!-- 病例信息 -->
+          <div class="csb-section">
+            <div class="csb-title">病例信息</div>
+            <div class="csb-card">
+              <div class="csb-row"><span class="csb-lbl">#</span><span class="csb-val" style="font-family:var(--mono)">001234</span></div>
+              <div class="csb-row"><span class="csb-lbl">患者</span><span class="csb-val">张明（32岁）</span></div>
+              <div class="csb-row"><span class="csb-lbl">类型</span><span class="csb-val">骨性三类·拔牙</span></div>
+              <div class="csb-row"><span class="csb-lbl">诊所</span><span class="csb-val">韶华口腔</span></div>
+              <div class="csb-row"><span class="csb-lbl">医生</span><span class="csb-val">王医生 ★</span></div>
+              <div class="csb-row"><span class="csb-lbl">SLA</span><span class="csb-sla">01:25</span></div>
+            </div>
+            <div class="csb-risk-badge">⚠ 退回率 67%</div>
+          </div>
+
+          <!-- 修改清单 -->
+          <div class="csb-section">
+            <div class="csb-title">修改清单 <span style="color:var(--danger);font-style:normal">（3 项待处理）</span></div>
+            <div class="mod-item" onclick="this.querySelector('.mod-check').classList.toggle('done');this.querySelector('.mod-text').classList.toggle('done')">
+              <div class="mod-check"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></div>
+              <span class="mod-text">内收 11、21（−0.5mm）</span>
+            </div>
+            <div class="mod-item" onclick="this.querySelector('.mod-check').classList.toggle('done');this.querySelector('.mod-text').classList.toggle('done')">
+              <div class="mod-check"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></div>
+              <span class="mod-text">远中移动 16（−1.5mm）</span>
+            </div>
+            <div class="mod-item" onclick="this.querySelector('.mod-check').classList.toggle('done');this.querySelector('.mod-text').classList.toggle('done')">
+              <div class="mod-check"><svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg></div>
+              <span class="mod-text">增加 13、23 附件（V1 无此项）</span>
+            </div>
+          </div>
+
+          <!-- 历史版本 -->
+          <div class="csb-section">
+            <div class="csb-title">历史版本</div>
+            <div class="csb-card">
+              <div class="ver-row">
+                <span class="ver-badge vb-old">V1</span>
+                <span class="ver-name">原始方案</span>
+                <button class="cf-btn" style="padding:3px 9px;font-size:11px" onclick="toast('📄 V1 方案对比')">查看</button>
+              </div>
+              <div class="ver-row">
+                <span class="ver-badge vb-curr">V2</span>
+                <span class="ver-name curr">当前版本</span>
+                <button class="cf-btn on" style="padding:3px 9px;font-size:11px" onclick="toast('📄 当前 V2 方案')">查看</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 快捷操作 -->
+          <div class="csb-section">
+            <div class="csb-title">快捷操作</div>
+            <div class="csb-actions">
+              <button class="csb-btn" onclick="switchPage('workbench');toast('🔗 已跳转至工作台 #001234')">在工作台中打开</button>
+              <button class="csb-btn-sec" onclick="toast('📋 修改清单已导出')">导出修改清单</button>
+              <button class="csb-btn-sec" onclick="toast('📤 已提交至审核队列')">提交审核</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /page-comm -->
+
+  <!-- ═══ PAGE: AI 图像分析 ═══ -->
+  <div id="page-image" class="page-view">
+    <!-- Toolbar -->
+    <div class="ia-toolbar">
+      <button class="tb-btn" onclick="toast('🔗 病例 #001234 张明（骨性三类·拔牙）已关联')">🔗 关联病例: #001234 张明 ▼</button>
+      <div class="view-mode-toggle">
+        <div class="vmt-btn on" onclick="this.parentNode.querySelectorAll('.vmt-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on');toast('↔ 左右分屏模式')">左右分屏</div>
+        <div class="vmt-btn" onclick="this.parentNode.querySelectorAll('.vmt-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on');toast('叠加对比模式')">叠加对比</div>
+      </div>
+      <div class="tb-sep"></div>
+      <button class="tb-btn ia-import-btn" onclick="toast('⬆ 请选择图像文件（支持 DICOM/PNG/JPEG）')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        导入图像
+      </button>
+      <button class="tb-btn ia-new-btn" onclick="toast('✅ 新建分析任务已创建')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        新建分析任务
+      </button>
+    </div>
+    <!-- Body layout -->
+    <div class="ia-layout">
+      <div class="ia-main">
+        <!-- Image compare -->
+        <div class="ia-section-title">图像对比</div>
+        <div class="img-compare">
+          <div class="img-frame">
+            <div class="img-frame-label">
+              <span class="ver-badge vb-old">V1</span> 原图
+            </div>
+            <div class="img-placeholder">
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--outline)" stroke-width="1"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="8" cy="8" r="2"/><path d="M2 14l6-6 4 4 3-3 7 7"/></svg>
+              <!-- AI annotations -->
+              <div class="img-annotation ann-r" style="width:70px;height:70px;top:30px;left:60px">
+                <span style="position:absolute;top:-13px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;background:var(--danger);color:#fff;padding:1px 5px;border-radius:3px;white-space:nowrap">11/21</span>
+              </div>
+              <div class="img-annotation ann-y" style="width:52px;height:52px;top:100px;right:60px;border-radius:6px">
+                <span style="position:absolute;top:-13px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;background:var(--warn);color:#fff;padding:1px 5px;border-radius:3px;white-space:nowrap">16</span>
+              </div>
+            </div>
+          </div>
+          <div class="img-frame">
+            <div class="img-frame-label">
+              <span class="ver-badge vb-curr">V2</span> 修改后
+            </div>
+            <div class="img-placeholder">
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--outline)" stroke-width="1"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="8" cy="8" r="2"/><path d="M2 14l6-6 4 4 3-3 7 7"/></svg>
+              <div class="img-annotation ann-g" style="width:70px;height:70px;top:30px;left:60px">
+                <span style="position:absolute;top:-13px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;background:var(--success);color:#fff;padding:1px 5px;border-radius:3px;white-space:nowrap">11/21 ✓</span>
+              </div>
+              <div class="img-annotation ann-y" style="width:52px;height:52px;top:100px;right:60px;border-radius:6px">
+                <span style="position:absolute;top:-13px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;background:var(--warn);color:#fff;padding:1px 5px;border-radius:3px;white-space:nowrap">16 ▶</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="img-legend">
+          <span class="legend-item"><span class="legend-dot" style="background:var(--danger)"></span>🔴 需修改</span>
+          <span class="legend-item"><span class="legend-dot" style="background:var(--warn)"></span>🟡 建议优化</span>
+          <span class="legend-item"><span class="legend-dot" style="background:var(--success)"></span>🟢 已达标</span>
+        </div>
+
+        <!-- AI Suggestions -->
+        <div class="ia-section-title">🤖 AI 修改建议</div>
+        <div class="ai-suggest-card">
+          <div class="asc-head">
+            <div class="asc-num">①</div>
+            <div class="asc-body">
+              <div class="asc-title">压低 11、21（约 0.5mm）</div>
+              <div class="asc-template">→ 参考标准模板 <span style="color:var(--primary);cursor:pointer;font-family:var(--mono)" onclick="openTmplModal()">#T-027</span></div>
+            </div>
+          </div>
+          <div class="asc-steps">建议步骤：先调整 11/21 转矩（−2°），再配合压低力 15g，分 3 步进行，每步约 0.2mm</div>
+          <div class="asc-btns">
+            <button class="asc-btn" onclick="openTmplModal()">查看模板</button>
+            <button class="asc-btn prim" onclick="toast('✅ 建议①已应用，请在 3D 编辑器中确认')">应用此建议</button>
+          </div>
+        </div>
+        <div class="ai-suggest-card">
+          <div class="asc-head">
+            <div class="asc-num" style="background:var(--warn)">②</div>
+            <div class="asc-body">
+              <div class="asc-title">远中移动 16（−1.5mm）</div>
+              <div class="asc-template">→ 参考标准模板 <span style="color:var(--primary);cursor:pointer;font-family:var(--mono)" onclick="openTmplModal()">#T-043</span></div>
+            </div>
+          </div>
+          <div class="asc-steps">建议步骤：先解除咬合锁结，配合 III 类牵引（150g），分步远中移动，注意防止支抗丢失</div>
+          <div class="asc-btns">
+            <button class="asc-btn" onclick="openTmplModal()">查看模板</button>
+            <button class="asc-btn prim" onclick="toast('✅ 建议②已应用，请在 3D 编辑器中确认')">应用此建议</button>
+          </div>
+        </div>
+
+        <!-- Recommended Templates -->
+        <div class="ia-section-title" style="margin-top:4px">📚 推荐标准模板</div>
+        <div class="template-grid">
+          <div class="tpl-card">
+            <div class="tpl-thumb" style="background:linear-gradient(135deg,#e0f2fe,#bae6fd)">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0369a1" stroke-width="1.5"><path d="M12 20V10M6 20V14M18 20V4"/></svg>
+            </div>
+            <div class="tpl-star">⭐</div>
+            <div class="tpl-id">#T-027</div>
+            <div class="tpl-name">前牙压低标准方案</div>
+            <span class="tpl-tag">前牙区</span>
+            <button class="tpl-apply" onclick="toast('✅ 模板 #T-027 已应用')">应用</button>
+          </div>
+          <div class="tpl-card">
+            <div class="tpl-thumb" style="background:linear-gradient(135deg,#fff7ed,#fed7aa)">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <div class="tpl-id">#T-043</div>
+            <div class="tpl-name">磨牙远中移动参考</div>
+            <span class="tpl-tag">磨牙区</span>
+            <button class="tpl-apply" onclick="toast('✅ 模板 #T-043 已应用')">应用</button>
+          </div>
+          <div class="tpl-card">
+            <div class="tpl-thumb" style="background:linear-gradient(135deg,#fef2f2,#fecaca)">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            </div>
+            <div class="tpl-id">#T-015</div>
+            <div class="tpl-name">骨性三类掩饰方案</div>
+            <span class="tpl-tag">骨性矫治</span>
+            <button class="tpl-apply" onclick="toast('✅ 模板 #T-015 已应用')">应用</button>
+          </div>
+        </div>
+        <button class="d-btn" onclick="openTmplModal()">查看全部模板库</button>
+
+        <!-- Bottom actions -->
+        <div style="display:flex;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--outline)">
+          <button class="act-btn ab-cr" style="font-size:12px;padding:7px 16px" onclick="toast('📄 方案报告生成中，预计30秒完成…')">一键生成方案报告</button>
+          <button class="act-btn ab-ur" style="font-size:12px;padding:7px 16px" onclick="toast('✅ 分析结果已推送至工作台 #001234')">推送主界面</button>
+          <button class="tb-btn" onclick="toast('💬 分析结果已发送给王医生（韶华口腔）')">发送给医生</button>
+        </div>
+      </div>
+
+      <!-- Right: AI result panel -->
+      <div class="ia-result">
+        <div class="ia-result-hd">
+          <div class="ia-result-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            AI 分析结果
+          </div>
+        </div>
+        <div class="ia-result-scroll">
+          <div class="ia-section-title" style="margin-bottom:8px">问题识别</div>
+          <div class="ia-prob-item ia-r">
+            <span class="ia-dot" style="background:var(--danger)"></span>
+            <div class="ia-prob-body">
+              <div class="ia-prob-title">🔴 区域1 · 11/21 前倾</div>
+              <div class="ia-prob-detail">超过目标值 +0.5mm，需压低矫正</div>
+            </div>
+          </div>
+          <div class="ia-prob-item ia-y">
+            <span class="ia-dot" style="background:var(--warn)"></span>
+            <div class="ia-prob-body">
+              <div class="ia-prob-title">🟡 区域2 · 16 咬合接触</div>
+              <div class="ia-prob-detail">接触不足，偏差约 −1.5mm</div>
+            </div>
+          </div>
+
+          <div class="ia-section-title" style="margin-top:12px;margin-bottom:8px">修改步骤导引</div>
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">调整转矩</div>
+              <div class="step-detail">11、21 转矩 −2°，为压低做准备</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">施加压低力</div>
+              <div class="step-detail">15g 压低力，分 3 步（每步 0.2mm）</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">远中牵引 16</div>
+              <div class="step-detail">III 类牵引 150g，防止支抗丢失</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">复核咬合</div>
+              <div class="step-detail">确认 13/23 附件位置，整体咬合平面</div>
+            </div>
+          </div>
+
+          <div class="ia-section-title" style="margin-top:12px;margin-bottom:8px">AI 置信度</div>
+          <div style="background:var(--bg);border:1px solid var(--outline);border-radius:var(--r-sm);padding:10px 12px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span>方案可行性</span><strong style="color:var(--success)">92%</strong></div>
+            <div style="height:4px;background:var(--outline);border-radius:2px;overflow:hidden;margin-bottom:8px"><div style="width:92%;height:100%;background:var(--success);border-radius:2px"></div></div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.5">压低量在临床范围内，建议提交前与王医生确认参数</div>
+          </div>
+        </div>
+        <div class="ia-result-footer">
+          <button class="ia-prim-btn" onclick="toast('📄 修改报告生成中，预计30秒完成…')">一键生成修改报告</button>
+          <button class="ia-sec-btn" onclick="toast('💬 已通过沟通协作模块发送给王医生')">发送给医生</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /page-image -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /shell -->
+<div class="hc" id="hc"></div>
+<div class="sc-overlay" id="scOverlay">
+  <div class="sc-panel">
+    <h3>⌨ 键盘快捷键</h3>
+    <div class="sc-row"><span>向下选择</span><span><kbd>J</kbd> / <kbd>↓</kbd></span></div>
+    <div class="sc-row"><span>向上选择</span><span><kbd>K</kbd> / <kbd>↑</kbd></span></div>
+    <div class="sc-row"><span>展开 / 收起 Drawer</span><span><kbd>Enter</kbd></span></div>
+    <div class="sc-row"><span>关闭 Hover Card / Drawer</span><span><kbd>Esc</kbd></span></div>
+    <div class="sc-row"><span>触发主操作</span><span><kbd>1</kbd></span></div>
+    <div class="sc-row"><span>一键催办</span><span><kbd>C</kbd></span></div>
+    <div class="sc-row"><span>聚焦搜索框</span><span><kbd>Ctrl</kbd>+<kbd>F</kbd></span></div>
+    <div class="sc-row"><span>快速筛选红/黄/蓝/灰区</span><span><kbd>Ctrl</kbd>+<kbd>1~4</kbd></span></div>
+    <div class="sc-row"><span>显示此面板</span><span><kbd>?</kbd></span></div>
+    <button class="sc-close" onclick="hideSC()">关闭</button>
+  </div>
+</div>
+<div class="toast-area" id="toasts"></div>
+<!-- ══ Template Library Modal ══ -->
+<div class="modal-overlay" id="tmplModal">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <span class="modal-title">📚 标准模板图纸库</span>
+      <div class="modal-search">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="搜索模板…">
+      </div>
+      <button class="modal-close" onclick="closeTmplModal()">✕</button>
+    </div>
+    <div class="modal-filter">
+      <button class="cf-btn on">全部</button>
+      <button class="cf-btn" onclick="this.parentNode.querySelectorAll('.cf-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on')">前牙区</button>
+      <button class="cf-btn" onclick="this.parentNode.querySelectorAll('.cf-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on')">磨牙区</button>
+      <button class="cf-btn" onclick="this.parentNode.querySelectorAll('.cf-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on')">骨性矫治</button>
+      <button class="cf-btn" onclick="this.parentNode.querySelectorAll('.cf-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on')">拔牙</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tpl-grid">
+        <div class="tpl-card"><div class="tpl-thumb" style="background:linear-gradient(135deg,#e0f2fe,#bae6fd)"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0369a1" stroke-width="1.5"><path d="M12 20V10M6 20V14M18 20V4"/></svg></div><div class="tpl-star">⭐</div><div class="tpl-id">#T-027</div><div class="tpl-name">前牙压低标准方案</div><span class="tpl-tag">前牙区</span><button class="tpl-apply" onclick="closeTmplModal();toast('✅ 模板 #T-027 已应用')">应用</button></div>
+        <div class="tpl-card"><div class="tpl-thumb" style="background:linear-gradient(135deg,#fff7ed,#fed7aa)"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div><div class="tpl-id">#T-043</div><div class="tpl-name">磨牙远中移动参考</div><span class="tpl-tag">磨牙区</span><button class="tpl-apply" onclick="closeTmplModal();toast('✅ 模板 #T-043 已应用')">应用</button></div>
+        <div class="tpl-card"><div class="tpl-thumb" style="background:linear-gradient(135deg,#fef2f2,#fecaca)"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div><div class="tpl-id">#T-015</div><div class="tpl-name">骨性三类掩饰方案</div><span class="tpl-tag">骨性矫治</span><button class="tpl-apply" onclick="closeTmplModal();toast('✅ 模板 #T-015 已应用')">应用</button></div>
+        <div class="tpl-card"><div class="tpl-thumb" style="background:linear-gradient(135deg,#f0fdf4,#bbf7d0)"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg></div><div class="tpl-id">#T-061</div><div class="tpl-name">深覆合矫治方案</div><span class="tpl-tag">前牙区</span><button class="tpl-apply" onclick="closeTmplModal();toast('✅ 模板 #T-061 已应用')">应用</button></div>
+        <div class="tpl-card"><div class="tpl-thumb" style="background:linear-gradient(135deg,#faf5ff,#e9d5ff)"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div><div class="tpl-id">#T-088</div><div class="tpl-name">强支抗拔牙方案</div><span class="tpl-tag">拔牙</span><button class="tpl-apply" onclick="closeTmplModal();toast('✅ 模板 #T-088 已应用')">应用</button></div>
+        <div class="tpl-card"><div class="tpl-thumb" style="background:linear-gradient(135deg,#ecfdf5,#6ee7b7)"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div class="tpl-id">#T-032</div><div class="tpl-name">局部矫治精修方案</div><span class="tpl-tag">前牙区</span><button class="tpl-apply" onclick="closeTmplModal();toast('✅ 模板 #T-032 已应用')">应用</button></div>
+        <div class="tpl-card"><div class="tpl-thumb" style="background:linear-gradient(135deg,#eff6ff,#bfdbfe)"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div><div class="tpl-id">#T-019</div><div class="tpl-name">全牙弓整体排齐</div><span class="tpl-tag">磨牙区</span><button class="tpl-apply" onclick="closeTmplModal();toast('✅ 模板 #T-019 已应用')">应用</button></div>
+        <div class="tpl-card"><div class="tpl-thumb" style="background:linear-gradient(135deg,#fff1f2,#fecdd3)"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div><div class="tpl-id">#T-055</div><div class="tpl-name">成人骨性二类方案</div><span class="tpl-tag">骨性矫治</span><button class="tpl-apply" onclick="closeTmplModal();toast('✅ 模板 #T-055 已应用')">应用</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 查看消息原件弹窗 -->
+<div class="mo" id="msgModal" onclick="if(event.target===this)closeMsgModal()">
+  <div class="mo-box">
+    <div class="mo-hd">
+      <div class="mo-title" id="mo-title">消息原件</div>
+      <div class="mo-who" id="mo-who"></div>
+      <button class="mo-close-btn" onclick="closeMsgModal()">×</button>
+    </div>
+    <div class="mo-tabs"></div>
+    <div class="mo-body">
+      <!-- 左列：消息原件 -->
+      <div class="mo-col-left">
+        <div class="mo-col-hd">📄 消息原件</div>
+        <div class="mo-panel" id="mo-p0">
+          <div class="raw-msg-card" id="mo-raw-card">
+            <div class="raw-msg-head">
+              <div class="raw-msg-avatar" id="mo-avatar">王</div>
+              <div><div class="raw-msg-from" id="mo-from">王医生（韶华口腔）</div><div class="raw-msg-time" id="mo-time">今天 07:30</div></div>
+            </div>
+            <div class="raw-msg-text" id="mo-raw-text"></div>
+            <div class="raw-msg-attach" onclick="toast('📎 附件查看中...')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+              V1方案.3dm（附件）
+            </div>
+          </div>
+          <div class="ai-rec-section" style="margin-top:12px">
+            <div class="ai-rec-title">🤖 AI补充分析</div>
+            <div style="font-size:12px;line-height:1.65;color:var(--muted);background:#f0f9fb;padding:10px 12px;border-radius:var(--r-sm);border:1px solid #cce8ef" id="mo-ai-note"></div>
+          </div>
+        </div>
+      </div>
+      <!-- 右列：AI识别结果 + 增减需求 -->
+      <div class="mo-col-right">
+        <!-- AI识别结果 -->
+        <div class="mo-panel" id="mo-p1">
+          <div class="mo-col-hd">🤖 AI 识别结果 &amp; 需求管理</div>
+          <div class="ai-conf"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>AI识别置信度 94%，共识别 <strong id="mo-req-count">3</strong> 项修改要求</div>
+          <div class="ai-rec-section" style="margin-top:10px">
+            <div class="ai-rec-title">识别到的修改参数</div>
+            <div id="mo-ai-rows"></div>
+          </div>
+        </div>
+        <!-- 增减需求（紧跟AI识别，无间隔） -->
+        <div class="mo-panel" id="mo-p2" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--outline)">
+          <div class="mo-col-hd" style="border-bottom:none;margin-bottom:6px">✏️ 增减需求</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px">勾选保留，取消勾选则移除；底部可新增 AI 未识别的需求。</div>
+          <div class="req-list" id="mo-req-list"></div>
+          <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:10px 0 6px">新增需求</div>
+          <div class="req-add">
+            <input type="text" id="mo-req-input" placeholder="输入新增需求，例如：增加 23 附件">
+            <button class="req-add-btn" onclick="addReq()">+ 添加</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mo-footer">
+      <button class="mo-act-btn contact" onclick="closeMsgModal();closeD(openDr);switchPage('comm');toast('💬 已跳转至在线消息沟通')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:5px;vertical-align:-1px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        在线消息沟通
+      </button>
+      <button class="mo-act-btn sec" onclick="closeMsgModal()">取消</button>
+      <button class="mo-act-btn prim" onclick="saveReqs()">保存需求变更</button>
+    </div>
+  </div>
+</div>
+<!-- 联系医生弹窗 -->
+<div class="cd-overlay" id="contactDocModal" onclick="if(event.target===this)closeContactDoc()">
+  <div class="cd-box">
+    <div class="cd-hd">
+      <div>
+        <div class="cd-hd-title">一键联系医生</div>
+        <div class="cd-hd-sub" id="cd-case-label">病例 #001234 · 张明</div>
+      </div>
+      <button class="cd-close" onclick="closeContactDoc()">×</button>
+    </div>
+    <div class="cd-body">
+      <div class="cd-doctor-card">
+        <div class="cd-doc-av" id="cd-doc-av">王</div>
+        <div>
+          <div class="cd-doc-name" id="cd-doc-name">王医生</div>
+          <div class="cd-doc-meta" id="cd-doc-meta">韶华口腔 · 退回率 67% <span class="cd-doc-star">★☆☆</span></div>
+        </div>
+      </div>
+      <div class="cd-channels">
+        <div class="cd-ch" onclick="selectChannel(this,'微信')">
+          <div class="cd-ch-icon">💬</div>
+          <div class="cd-ch-name">微信</div>
+          <div class="cd-ch-desc">直接发送至医生绑定微信，通常 5 分钟内回复</div>
+        </div>
+        <div class="cd-ch" onclick="selectChannel(this,'短信')">
+          <div class="cd-ch-icon">📱</div>
+          <div class="cd-ch-name">短信</div>
+          <div class="cd-ch-desc">发送系统短信提醒，适合医生不在线时</div>
+        </div>
+        <div class="cd-ch" onclick="selectChannel(this,'诊所 APP')">
+          <div class="cd-ch-icon">🏥</div>
+          <div class="cd-ch-name">诊所 APP</div>
+          <div class="cd-ch-desc">推送至领健诊所端 APP 通知栏</div>
+        </div>
+        <div class="cd-ch" onclick="selectChannel(this,'电话')">
+          <div class="cd-ch-icon">📞</div>
+          <div class="cd-ch-name">电话</div>
+          <div class="cd-ch-desc">显示医生联系电话，人工拨打确认</div>
+        </div>
+      </div>
+      <div class="cd-msg-area">
+        <div class="cd-msg-lbl">预设消息（可编辑）</div>
+        <div class="cd-msg-pre" id="cd-msg-pre" contenteditable="true"></div>
+      </div>
+    </div>
+    <div class="cd-footer">
+      <button class="cd-cancel-btn" onclick="closeContactDoc()">取消</button>
+      <button class="cd-send-btn" onclick="sendContactMsg()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:5px;vertical-align:-1px"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        发送给医生
+      </button>
+    </div>
+  </div>
+</div>
+<script>
+const CASES=[
+  {id:'001234',z:'cr',pat:'张明',age:32,done:false,tags:[{t:'#拔牙',c:'t-r'},{t:'#骨性三类',c:'t-r'},{t:'#强支抗',c:'t-o'}],clinic:'韶华口腔',doc:'王医生',stars:1,slaMin:85,reason:'因剩余时效仅85min且医生退回，标记红区',sum:'[医生退回] ①压低11、21约0.5mm ②远中移动16、26 ③增加13、23附件',act:'立即修改',hot:true,hType:'ret',hd:{who:'王医生（韶华口腔）',when:'今天 07:30（2小时前）',todos:['压低 11、21（约 0.5mm）','远中移动 16、26','增加 13、23 附件'],done:[true,false,false]},dType:'ret',dTodos:['压低 11、21（约 0.5mm）','远中移动 16、26（约 -1.5mm）','增加 13、23 附件'],dDone:[true,false,false],cmp:[{p:'11 压低',v1:'+0.2mm',now:'+0.7mm',diff:true},{p:'16 远中移动',v1:'无',now:'-1.5mm（新增）',diff:true},{p:'13 附件',v1:'无',now:'需要（新增）',diff:true}]},
+  {id:'001198',z:'cr',pat:'李晓燕',age:28,done:false,tags:[{t:'#深覆合',c:'t-r'},{t:'#垂直控制',c:'t-o'}],clinic:'欧洲口腔',doc:'赵医生',stars:2,slaMin:190,reason:'因内审驳回且剩余时效190min，标记红区',sum:'[内审驳回] ①增加前牙咬合垫方案 ②调整垂直向控制参数 ③复核11-21转矩',act:'立即修改',hot:true,hType:'ret',hd:{who:'内审 Leader（李工）',when:'今天 08:15（1小时前）',todos:['增加前牙咬合垫方案','调整垂直向控制参数','复核 11-21 转矩'],done:[false,false,false]},dType:'ret',dTodos:['增加前牙咬合垫方案','调整垂直向控制参数','复核 11-21 转矩'],dDone:[false,false,false],cmp:[{p:'前牙覆合',v1:'4mm',now:'≤2mm（要求）',diff:true},{p:'咬合垫',v1:'无',now:'需要（新增）',diff:true}]},
+  {id:'001256',z:'cr',pat:'王大海',age:45,done:false,tags:[{t:'#骨性二类',c:'t-o'},{t:'#全牙弓',c:'t-g'}],clinic:'华美口腔',doc:'刘医生',stars:3,slaMin:168,reason:'当日第2次退回且时效168min，标记红区',sum:'[医生退回] ①16远中移动1.5mm ②重新评估咬合平面倾斜度 ③更新附件位置',act:'立即修改',hot:true,hType:'ret',hd:{who:'刘医生（华美口腔）',when:'今天 06:50（2小时前）',todos:['16 远中移动 1.5mm','重新评估咬合平面倾斜度','更新附件位置'],done:[false,false,false]},dType:'ret',dTodos:['16 远中移动 1.5mm','重新评估咬合平面倾斜度','更新附件位置'],dDone:[false,false,false],cmp:[{p:'16 位移',v1:'-0.5mm',now:'-1.5mm',diff:true},{p:'咬合平面',v1:'现状',now:'需重新评估',diff:true}]},
+  {id:'001267',z:'ur',pat:'陈思思',age:25,done:false,tags:[{t:'#非拔牙',c:'t-g'},{t:'#局部矫治',c:'t-g'}],clinic:'雅美口腔',doc:'孙医生',stars:3,slaMin:1110,reason:'首版新病例，SLA充裕（18.5h），标记黄区',sum:'[首版] ①确认非拔牙方案可行性 ②规划局部矫治步骤 ③检查SLA节点（剩余18.5h）',act:'开始设计',hot:true,hType:'new',hd:{slaLabel:'18.5h',docNote:'孙医生 ★★★ 配合良好',checklist:['确认非拔牙方案可行性','规划局部矫治步骤','检查SLA节点'],done:[false,false,false]}},
+  {id:'001271',z:'ur',pat:'刘浩然',age:19,done:false,tags:[{t:'#拔牙',c:'t-r'},{t:'#I类',c:'t-g'}],clinic:'长宁口腔',doc:'吴医生',stars:2,slaMin:862,reason:'首版新病例，SLA充裕（14.4h），标记黄区',sum:'[首版] ①确认拔牙方案及支抗设计 ②I类咬合精修预留步骤 ③送审前与吴医生沟通确认',act:'开始设计',hot:true,hType:'new',hd:{slaLabel:'14.4h',docNote:'吴医生 ★★ 偶有退回，需沟通',checklist:['确认拔牙方案及支抗设计','I类咬合精修预留步骤','方案送审前与吴医生沟通确认'],done:[false,false,false]}},
+  {id:'001289',z:'ur',pat:'赵雯婷',age:38,done:false,tags:[{t:'#骨性三类',c:'t-r'},{t:'#强支抗',c:'t-o'},{t:'#拔牙',c:'t-r'}],clinic:'悦澳口腔',doc:'郑医生',stars:3,slaMin:1335,reason:'复杂病例（多拔牙+强支抗），SLA充裕，标记黄区',sum:'[首版] ①骨性三类掩饰性治疗评估 ②TAD位置确认 ③拔牙序列规划 ④复核上下颌咬合平面',act:'开始设计',hot:true,hType:'new',hd:{slaLabel:'22.3h',docNote:'郑医生 ★★★ 配合良好',checklist:['骨性三类掩饰性治疗范围评估','强支抗方案：TAD位置确认','拔牙序列与关闭间隙步骤规划','复核上下颌咬合平面协调性'],done:[false,false,false,false]}},
+  {id:'001302',z:'ur',pat:'黄俊峰',age:22,done:false,tags:[{t:'#非拔牙',c:'t-g'}],clinic:'名仕口腔',doc:'周医生',stars:1,slaMin:525,reason:'关联医生退回率高（★），SLA剩余8.8h，需重点留意',sum:'[首版] ①严格核查关键移动量 ②方案备注高风险标记 ③完成后内审复核再提交（⚠医生退回率高）',act:'开始设计',hot:true,hType:'new',hd:{slaLabel:'8.8h（注意SLA）',docNote:'⚠ 周医生 ★ 退回率高，严格把关',checklist:['严格核查关键移动量','方案备注高风险标记','完成后内审复核再提交'],done:[false,false,false]}},
+  {id:'001315',z:'ur',pat:'吴嘉怡',age:16,done:false,tags:[{t:'#局部矫治',c:'t-g'},{t:'#垂直控制',c:'t-o'}],clinic:'儿童口腔',doc:'钱医生',stars:3,slaMin:1233,reason:'首版新病例，SLA充裕（20.6h），标记黄区',sum:'[首版] ①青少年生长发育评估 ②垂直向控制（避免前牙开合倾向） ③局部矫治范围确认',act:'开始设计',hot:true,hType:'new',hd:{slaLabel:'20.6h',docNote:'钱医生 ★★★ 配合良好',checklist:['青少年生长发育评估','垂直向控制：避免前牙开合倾向','局部矫治范围确认'],done:[false,false,false]}},
+  {id:'001231',z:'pe',pat:'孙宇航',age:30,done:false,tags:[{t:'#全牙弓',c:'t-g'},{t:'#I类',c:'t-g'}],clinic:'精工口腔',doc:'冯医生',stars:3,slaMin:-1,reason:'已提交等待医生确认，SLA已暂停，设计师无需主动推进',sum:'[待医生确认] 全牙弓方案已提交·方案文件已上传·咬合调整意见待收集·等待冯医生审阅',act:'催办确认',hot:true,hType:'susp',hd:{days:1,lastUrge:'今天 09:15',mats:[{n:'医生方案确认',s:'miss',req:true},{n:'咬合调整意见',s:'miss',req:false},{n:'方案文件已上传',s:'ok',req:true}]}},
+  {id:'001245',z:'pe',pat:'周丽华',age:55,done:false,tags:[{t:'#骨性二类',c:'t-o'},{t:'#深覆合',c:'t-r'}],clinic:'康宁口腔',doc:'陈医生',stars:2,slaMin:-1,reason:'已提交内审等待Leader确认，SLA宽裕，标记蓝区',sum:'[待内审] 骨性二类深覆合·咬合垫方案已完成·CBCT已评估·等待Leader确认',act:'催办确认',hot:true,hType:'susp',hd:{days:0,lastUrge:'今天 10:30',mats:[{n:'Leader内审确认',s:'miss',req:true},{n:'深覆合咬合垫方案',s:'ok',req:true},{n:'CBCT评估记录',s:'ok',req:false}]}},
+  {id:'001189',z:'pa',pat:'郑志强',age:42,done:false,tags:[{t:'#拔牙',c:'t-r'},{t:'#骨性三类',c:'t-r'}],clinic:'丽雅口腔',doc:'林医生',stars:1,slaMin:-1,reason:'资料缺失2天且SLA暂停，已催办2次无响应，标记灰区',sum:'[资料缺失] 缺右侧咬合像（已缺2天）·缺CBCT·面像照/口扫已齐全·已催办2次未响应',act:'催办补传',hot:true,hType:'susp',hd:{days:2,lastUrge:'昨天 15:00',mats:[{n:'右侧咬合像',s:'miss',req:true},{n:'CBCT',s:'miss',req:false},{n:'面像照',s:'ok',req:true},{n:'口扫文件',s:'ok',req:true}]},dType:'susp',dMats:[{n:'右侧咬合像',s:'miss',req:true},{n:'CBCT',s:'miss',req:false},{n:'面像照',s:'ok',req:true},{n:'口扫文件',s:'ok',req:true}],dUrges:[{t:'2026-06-02',a:'系统自动催办'},{t:'2026-06-03',a:'陈薇手动催办'},{t:'2026-06-04',a:'（今日尚未催办）'}]},
+  {id:'001203',z:'pa',pat:'马美玲',age:15,done:false,tags:[{t:'#青少年',c:'t-g'},{t:'#非拔牙',c:'t-g'}],clinic:'亲子口腔',doc:'韩医生',stars:3,slaMin:-1,reason:'CBCT缺失且SLA暂停，等待诊所补传，标记灰区',sum:'[资料缺失] 缺CBCT（建议提供）·面像照及口扫文件已齐全·等待诊所补传',act:'催办补传',hot:true,hType:'susp',hd:{days:1,lastUrge:'今天 08:00',mats:[{n:'CBCT',s:'miss',req:false},{n:'面像照',s:'ok',req:true},{n:'口扫文件',s:'ok',req:true}]},dType:'susp',dMats:[{n:'CBCT',s:'miss',req:false},{n:'面像照',s:'ok',req:true},{n:'口扫文件',s:'ok',req:true}],dUrges:[{t:'2026-06-03',a:'系统自动催办'},{t:'2026-06-04',a:'陈薇手动催办'}]},
+];
+let activeZones=new Set(),srchQ='',openDr=-1,kbIdx=0,viewMode='ai',activeTab='all';
+let slaOff={};CASES.forEach((_,i)=>slaOff[i]=0);
+let visItems=[],doneCnt=12;
+function stars(n){const cls=n===1?'s1':n===2?'s2':'s3';const tip=n===1?'高频退回，需重点关注':n===2?'偶有退回，注意沟通':'配合良好';return `<span class="stars ${cls}" title="${tip}">${'★'.repeat(n)+'☆'.repeat(3-n)}</span>`;}
+function slaClass(rem){const h=Math.floor(rem/3600);return h>=24?'g':h>=4?'o':'r';}
+function slaFmt(slaMin,off){if(slaMin<0)return null;const rem=Math.max(0,slaMin*60-off);const h=Math.floor(rem/3600),m=Math.floor((rem%3600)/60),s=rem%60;return h>0?`${h}h ${String(m).padStart(2,'0')}m`:`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
+function slaHtml(c,i){if(c.slaMin<0)return '<div class="sla-v gray">SLA已暂停</div>';const rem=Math.max(0,c.slaMin*60-slaOff[i]);return `<div class="sla-v ${slaClass(rem)}" data-si="${i}">剩余 ${slaFmt(c.slaMin,slaOff[i])}</div>`;}
+function rcls(z){return z==='cr'?'r':z==='ur'?'y':z==='pe'?'b':'g';}
+function drawerHtml(c,i){
+  const doneBtn=`<button class="d-btn done-btn" onclick="markDone(${i})">✅ 标记完成</button>`;
+  const reasonHtml=`<div class="d-reason">💡 <strong>优先级依据：</strong>${c.reason||'—'}</div>`;
+  if(c.dType==='ret'){
+    const todos=c.dTodos||[],done=[...(c.dDone||todos.map(()=>false))];
+    const dc=done.filter(Boolean).length,pct=todos.length?Math.round(dc/todos.length*100):0;
+    const tH=todos.map((t,ti)=>`<div class="d-todo"><div class="d-cb ${done[ti]?'ck':''}" onclick="toggleTodo(${i},${ti})">${done[ti]?'✓':''}</div><span class="d-txt ${done[ti]?'done':''}">${ti+1}. ${t}</span></div>`).join('');
+    const cH=(c.cmp||[]).map(r=>`<tr><td>${r.p}</td><td>${r.v1}</td><td class="${r.diff?'diff':''}">${r.now}</td></tr>`).join('');
+    return `<div class="d-inner"><div>${reasonHtml}<div class="d-title">📌 AI 结构化修改清单</div><div class="d-todos">${tH}</div><div class="d-prog"><div class="d-prog-lbl">完成进度：${dc}/${todos.length}</div><div class="d-prog-bar"><div class="d-prog-fill" style="width:${pct}%"></div></div></div></div><div><div class="d-title">📊 V1 vs 本次要求对比</div><table class="d-table"><thead><tr><th>参数</th><th>V1设计</th><th>本次要求</th></tr></thead><tbody>${cH}</tbody></table><button class="msg-view-btn" onclick="openMsgModal(${i})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>查看消息原件</button></div><div class="d-acts"><button class="d-btn prim" onclick="closeD(${i});switchPage('image');toast('🔬 已跳转至 AI 图像分析')">一键导入CAD</button><button class="d-btn" onclick="toast('📤 文件上传窗口已打开')">上传V2方案</button><button class="d-btn" onclick="closeD(${i});switchPage('comm');toast('💬 已跳转至在线消息沟通')">发起沟通</button>${doneBtn}<button class="d-close" onclick="closeD(${i})">关闭 ↑</button></div></div>`;
+  }
+  if(c.dType==='susp'){
+    const mH=(c.dMats||[]).map(m=>`<div class="mat-item"><span>${m.s==='ok'?'✅':'❌'}</span><span class="mat-name">${m.n}</span><span class="mat-badge ${m.s==='ok'?'mb-ok':m.req?'mb-req':'mb-opt'}">${m.s==='ok'?'已提供':m.req?'必需':'建议'}</span></div>`).join('');
+    const uH=(c.dUrges||[]).map(u=>`<div class="urge-row"><span class="urge-t">${u.t}</span><span>${u.a}</span></div>`).join('');
+    return `<div class="d-inner"><div>${reasonHtml}<div class="d-title">📋 缺失物料清单</div><div class="mat-list">${mH}</div></div><div><div class="d-title">📞 催办记录</div><div class="urge-tl">${uH}</div></div><div class="d-acts"><button class="d-btn prim" onclick="toast('📨 催办消息已自动发送')">一键催办</button><button class="d-btn" onclick="toast('📎 上传窗口已打开')">上传补传资料</button>${doneBtn}<button class="d-close" onclick="closeD(${i})">关闭 ↑</button></div></div>`;
+  }
+  return `<div class="d-inner" style="grid-template-columns:1fr"><div>${reasonHtml}<div class="d-title">📋 病例信息</div><div style="font-size:12px;line-height:1.8">${c.sum}</div></div><div class="d-acts"><button class="d-btn prim" onclick="toast('▶ 已跳转至设计工具')">开始设计</button>${doneBtn}<button class="d-close" onclick="closeD(${i})">关闭 ↑</button></div></div>`;
+}
+function markDone(i){
+  CASES[i].done=true;closeD(i);
+  const el=document.getElementById('cr-'+i);if(el)el.classList.add('flash');
+  doneCnt++;updateCounts();buildFC();
+  if(viewMode==='tab')renderTab();
+  toast('✅ #'+CASES[i].id+' '+CASES[i].pat+' 已完成');
+  setTimeout(()=>render(),680);
+}
+function updateCounts(){
+  ['cr','ur','pe','pa'].forEach(z=>{
+    const n=CASES.filter(c=>!c.done&&c.z===z).length;
+    const a=document.getElementById('cnt-'+z);if(a)a.textContent=n;
+    const b=document.getElementById('tcnt-'+z);if(b)b.textContent=n;
+  });
+  const sd=document.getElementById('s-done');if(sd)sd.textContent=doneCnt+' / 35';
+  const fd=document.getElementById('fc-done-cnt');if(fd)fd.textContent=doneCnt+' 件';
+}
+function buildFC(){
+  // 在每个区域内按 slaMin 降序（剩余时效最长排最前，最紧急排最后 = 最高编号）
+  const sKey=c=>c.slaMin<0?Infinity:c.slaMin;
+  const zItems=z=>CASES.map((c,i)=>({c,i})).filter(x=>!x.c.done&&x.c.z===z).sort((a,b)=>sKey(b.c)-sKey(a.c));
+  const reds=zItems('cr'),yels=zItems('ur'),bles=zItems('pe');
+  const pool=reds.length?reds:yels.length?yels:bles;
+  const alertEl=document.getElementById('fc-alert');
+  if(!pool.length){
+    if(alertEl)alertEl.style.display='none';
+    const oe=document.getElementById('fc-order');if(oe)oe.textContent='全部完成';
+    return;
+  }
+  if(alertEl)alertEl.style.display='';
+  // 最后一项 = 最紧急（slaMin最小），其区域内序号 = pool.length
+  const {c:urgent,i:ui}=pool[pool.length-1];
+  const badgeLbl={cr:'红',ur:'黄',pe:'蓝',pa:'灰'}[urgent.z];
+  const badgeNum=pool.length;
+  const ce=document.getElementById('fc-al-case');
+  if(ce){ce.textContent=badgeLbl+badgeNum+' · #'+urgent.id+' · '+urgent.pat+'（'+urgent.clinic+'）';ce.onclick=()=>openD(ui);}
+  const le=document.getElementById('fc-al-lbl');
+  if(le){const lbls={cr:'🔴 立即处理',ur:'🟡 下一处理',pe:'🔵 待确认',pa:'⚪ 灰区'};le.textContent=lbls[urgent.z]||'立即处理';}
+  const se=document.getElementById('fc-sla');
+  if(se){if(urgent.slaMin<0){se.textContent='SLA已暂停';}else{const rem=Math.max(0,urgent.slaMin*60-slaOff[ui]);se.textContent='剩余 '+String(Math.floor(rem/60)).padStart(2,'0')+':'+String(rem%60).padStart(2,'0');}}
+  const oe=document.getElementById('fc-order');
+  if(oe){
+    const orderParts=[];
+    [['cr','红'],['ur','黄'],['pe','蓝']].forEach(([z,lbl])=>{
+      const items=zItems(z); // sorted: [0]=最不紧急(红1), [last]=最紧急(红3)
+      for(let j=items.length-1;j>=0;j--) orderParts.push(lbl+(j+1));
+    });
+    oe.textContent=orderParts.length?orderParts.slice(0,5).join(' → '):'全部完成';
+  }
+}
+function render(){
+  const list=document.getElementById('cl');
+  visItems=CASES.map((c,i)=>({c,i})).filter(({c})=>{
+    if(c.done)return false;
+    if(activeZones.size>0&&!activeZones.has(c.z))return false;
+    if(srchQ){const q=srchQ.toLowerCase();return c.id.includes(q)||c.pat.includes(q)||c.clinic.includes(q)||c.doc.includes(q);}
+    return true;
+  });
+  // 区域顺序：红→黄→蓝→灰；区域内按 slaMin 降序（最紧急排最后 = 最高编号 = 红3/黄5/蓝2）
+  const _zOrd={cr:0,ur:1,pe:2,pa:3};const _sKey2=c=>c.slaMin<0?Infinity:c.slaMin;
+  visItems.sort((a,b)=>{if(a.c.z!==b.c.z)return _zOrd[a.c.z]-_zOrd[b.c.z];return _sKey2(b.c)-_sKey2(a.c);});
+  if(visItems.length>0)kbIdx=Math.min(kbIdx,visItems.length-1);
+  if(!visItems.length){list.innerHTML='<div class="empty"><div style="font-size:28px">🎉</div><p>本区间暂无待处理病例</p></div>';return;}
+  const _zCnt={};const _zLbl={cr:'红',ur:'黄',pe:'蓝',pa:'灰'};
+  visItems.forEach(it=>{_zCnt[it.c.z]=(_zCnt[it.c.z]||0)+1;it._zn=_zLbl[it.c.z]+_zCnt[it.c.z];});
+  list.innerHTML=visItems.map(({c,i,_zn},vi)=>`<div class="cr z-${c.z} ${kbIdx===vi?'kb-focus':''}" id="cr-${i}" tabindex="0"><div class="cr-main" onclick="onRC(event,${i},${vi})"><div class="c-id"><span class="zn-badge zn-${c.z}"><span class="zn-dot"></span>${_zn}</span></div><div class="c-pat"><div><span class="p-name">${c.pat}</span><span class="p-age">(${c.age}岁)</span></div><div class="p-tags">${c.tags.map(t=>`<span class="tag ${t.c}">${t.t}</span>`).join('')}<span class="reason-chip ${rcls(c.z)}" title="${c.reason}">${c.reason}</span></div></div><div class="c-col"><div class="col-clinic">${c.clinic}</div><div class="col-doc">${c.doc}${stars(c.stars)}</div></div><div class="c-sum"><div class="sum-txt ${c.hot?'hot':''}" ${c.hot?`onmouseenter="schedHC(event,${i})" onmouseleave="cancelHC()" onclick="openD(${i})"`:''}>${c.sum}</div></div><div class="c-sla">${slaHtml(c,i)}<div class="sla-lbl">SLA</div></div><div class="c-act"><button class="done-btn ${c.done?'done-state':''}" title="标记完成" onclick="event.stopPropagation();markDone(${i})">✓</button><button class="act-btn ab-${c.z}" onclick="onAB(event,${i})">${c.act}</button></div></div><div class="drawer ${openDr===i?'open':''}" id="dr-${i}">${openDr===i?drawerHtml(c,i):''}</div></div>`).join('');
+}
+const Z_LBL={cr:'🔴 红区 · 立即处理',ur:'🟡 黄区 · 待处理',pe:'🔵 蓝区 · 待确认',pa:'⚪ 灰区 · 资料缺失'};
+function renderTab(){
+  const body=document.getElementById('tabBody');if(!body)return;
+  const zones=activeTab==='all'?['cr','ur','pe','pa']:[activeTab];
+  let html='';
+  zones.forEach(z=>{
+    const items=CASES.map((c,i)=>({c,i})).filter(({c})=>!c.done&&c.z===z);
+    if(!items.length)return;
+    html+=`<div class="tab-sec-title"><span>${Z_LBL[z]}</span><span style="font-weight:400;margin-left:4px">${items.length} 件</span></div>`;
+    items.forEach(({c,i})=>{
+      const strVal=c.slaMin<0?'SLA暂停':slaFmt(c.slaMin,slaOff[i]);
+      const rem=c.slaMin<0?-1:Math.max(0,c.slaMin*60-slaOff[i]);
+      const col=rem<0?'var(--muted)':{'g':'var(--success)','o':'var(--warn)','r':'var(--danger)'}[slaClass(rem)];
+      html+=`<div class="tab-row z-${z}" onclick="openD(${i})"><span class="tr-id">#${c.id}</span><span class="tr-pat">${c.pat}<small>(${c.age}岁)</small></span><span class="tr-clinic">${c.clinic} · ${c.doc}</span><span class="tr-sla" style="color:${col}">${strVal}</span><span class="tr-reason" title="${c.reason}">${c.reason}</span><span class="tr-act" style="display:flex;align-items:center;gap:6px"><button class="done-btn ${c.done?'done-state':''}" title="标记完成" onclick="event.stopPropagation();markDone(${i})">✓</button><button class="act-btn ab-${z}" onclick="event.stopPropagation();onAB(event,${i})">${c.act}</button></span></div>`;
+    });
+  });
+  if(!html)html='<div class="empty"><div style="font-size:28px">🎉</div><p>本区间暂无待处理病例</p></div>';
+  body.innerHTML=html;
+}
+function switchTab(tab){activeTab=tab;document.querySelectorAll('.tn-item').forEach(el=>el.classList.toggle('on',el.dataset.tz===tab));renderTab();}
+function swView(m){
+  viewMode=m;
+  document.getElementById('vAI').classList.toggle('on',m==='ai');
+  document.getElementById('vTab').classList.toggle('on',m==='tab');
+  document.getElementById('aiView').classList.toggle('hidden',m!=='ai');
+  document.getElementById('tabView').classList.toggle('active',m==='tab');
+  if(m==='tab')renderTab();
+}
+function fz(zone){
+  if(activeZones.has(zone))activeZones.delete(zone);else activeZones.add(zone);
+  document.querySelectorAll('.z-chip').forEach(el=>el.classList.toggle('on',activeZones.has(el.dataset.zone)));
+  const cb=document.getElementById('zb-clear');if(cb)cb.style.display=activeZones.size>0?'':'none';
+  kbIdx=0;render();
+}
+function clearFilter(){
+  activeZones.clear();
+  document.querySelectorAll('.z-chip').forEach(el=>el.classList.remove('on'));
+  const cb=document.getElementById('zb-clear');if(cb)cb.style.display='none';
+  kbIdx=0;render();
+}
+function doSearch(v){srchQ=v;kbIdx=0;render();}
+function onRC(e,i,vi){if(e.target.closest('.act-btn')||e.target.closest('.sum-txt.hot'))return;kbIdx=vi;toggleD(i);}
+function onAB(e,i){e.stopPropagation();const c=CASES[i];if(c.act==='立即修改'){switchPage('image');toast('🔬 已跳转至 AI 图像分析');}else{openD(i);}}
+function openD(i){
+  if(openDr===i){closeD(i);return;}
+  if(openDr>=0){const p=document.getElementById('dr-'+openDr);if(p){p.classList.remove('open');p.innerHTML='';}}
+  openDr=i;const el=document.getElementById('dr-'+i);
+  if(el){el.innerHTML=drawerHtml(CASES[i],i);el.classList.add('open');}
+}
+function closeD(i){const el=document.getElementById('dr-'+i);if(el){el.classList.remove('open');setTimeout(()=>{if(!el.classList.contains('open'))el.innerHTML='';},220);}if(openDr===i)openDr=-1;}
+function toggleD(i){openDr===i?closeD(i):openD(i);}
+function toggleTodo(ci,ti){
+  const c=CASES[ci];if(!c.dDone)c.dDone=c.dTodos.map(()=>false);
+  c.dDone[ti]=!c.dDone[ti];if(c.hd&&c.hd.done)c.hd.done[ti]=c.dDone[ti];
+  const dr=document.getElementById('dr-'+ci);if(dr&&dr.classList.contains('open'))dr.innerHTML=drawerHtml(c,ci);
+  if(activeHCi===ci)buildHC(ci,null);
+}
+let hcTimer=null,hcLeave=null,activeHCi=-1;
+function schedHC(e,i){clearTimeout(hcLeave);if(activeHCi===i)return;clearTimeout(hcTimer);const tgt=e.currentTarget;hcTimer=setTimeout(()=>showHC(i,tgt),300);}
+function cancelHC(){clearTimeout(hcTimer);hcLeave=setTimeout(()=>{const hc=document.getElementById('hc');if(!hc.matches(':hover'))hideHC();},200);}
+function showHC(i,tgt){const c=CASES[i];if(!c.hType)return;activeHCi=i;buildHC(i,tgt);const hc=document.getElementById('hc');hc.classList.add('vis');hc.onmouseenter=()=>clearTimeout(hcLeave);hc.onmouseleave=()=>{hcLeave=setTimeout(hideHC,200);};}
+function buildHC(i,tgt){
+  const c=CASES[i],hc=document.getElementById('hc');let html='';
+  if(c.hType==='ret'){
+    const d=c.hd,dc=d.done.filter(Boolean).length;
+    const tH=d.todos.map((t,ti)=>`<div class="hc-item"><div class="hc-cb ${d.done[ti]?'ck':''}" onclick="toggleTodo(${i},${ti})">${d.done[ti]?'✓':''}</div><span>${ti+1}. ${t}</span></div>`).join('');
+    html=`<div class="hc-head"><div class="hc-title">📋 退回意见</div><div class="hc-meta">${d.who}<br>${d.when}</div></div><div class="hc-body"><div class="hc-list">${tH}</div><div class="hc-prog">进度：${dc}/${d.todos.length} 完成</div></div><div class="hc-foot"><button class="hc-btn p" onclick="switchPage('image');hideHC();toast('🔬 已跳转至AI图像分析')">▶ 立即修改</button><button class="hc-btn" onclick="openD(${i});hideHC()">展开详情 →</button></div>`;
+  }else if(c.hType==='new'){
+    const d=c.hd,dc=d.done.filter(Boolean).length;
+    const tH=d.checklist.map((t,ti)=>`<div class="hc-item"><div class="hc-cb ${d.done[ti]?'ck':''}" onclick="toggleTodoNew(${i},${ti})">${d.done[ti]?'✓':''}</div><span>${ti+1}. ${t}</span></div>`).join('');
+    html=`<div class="hc-head"><div class="hc-title">📋 设计要点</div><div class="hc-meta">SLA剩余 ${d.slaLabel}<br>${d.docNote}</div></div><div class="hc-body"><div class="hc-list">${tH}</div><div class="hc-prog">核查：${dc}/${d.checklist.length} 项已确认</div></div><div class="hc-foot"><button class="hc-btn p" onclick="openD(${i});hideHC()">▶ 开始设计</button><button class="hc-btn" onclick="openD(${i});hideHC()">展开详情 →</button></div>`;
+  }else if(c.hType==='susp'){
+    const d=c.hd;
+    const mH=d.mats.map(m=>`<div class="hc-item"><span>${m.s==='ok'?'✅':'❌'}</span><span style="flex:1">${m.n}</span><span style="font-size:9px;color:${m.s==='ok'?'#16a34a':m.req?'#dc2626':'#64748b'}">${m.s==='ok'?'已提供':m.req?'必需':'建议'}</span></div>`).join('');
+    html=`<div class="hc-head"><div class="hc-title">⏸ 挂起原因</div><div class="hc-meta">已等待 ${d.days} 天<br>上次催办：${d.lastUrge}</div></div><div class="hc-body"><div class="hc-list">${mH}</div></div><div class="hc-foot"><button class="hc-btn u" id="ubtn-${i}" onclick="urgeHC(${i})">📨 一键催办</button><button class="hc-btn" onclick="toast('📎 上传窗口已打开')">📎 上传</button><button class="hc-btn" onclick="openD(${i});hideHC()">展开 →</button></div>`;
+  }
+  hc.innerHTML=html;
+  if(tgt)requestAnimationFrame(()=>posHC(hc,tgt));
+}
+function toggleTodoNew(i,ti){CASES[i].hd.done[ti]=!CASES[i].hd.done[ti];buildHC(i,null);}
+function urgeHC(i){const btn=document.getElementById('ubtn-'+i);if(btn){btn.textContent='已催办 ✓';btn.classList.add('done');toast('📨 催办消息已自动发送');setTimeout(()=>{if(btn.textContent==='已催办 ✓'){btn.textContent='📨 一键催办';btn.classList.remove('done');}},2000);}}
+function posHC(hc,tgt){
+  const r=tgt.getBoundingClientRect(),hcH=hc.getBoundingClientRect().height||300;
+  let l=r.right+8,t=r.top;
+  if(l+320>window.innerWidth-8)l=r.left-328;
+  if(t+hcH>window.innerHeight-8)t=window.innerHeight-hcH-8;
+  hc.style.left=l+'px';hc.style.top=Math.max(8,t)+'px';
+}
+function hideHC(){document.getElementById('hc').classList.remove('vis');activeHCi=-1;}
+let refreshCountdown=30;
+function doAutoRefresh(){
+  // 模拟从服务端拉取最新数据：对未完成病例的 SLA 做轻微扰动（±0~2s），并重建计数
+  CASES.forEach((c,i)=>{if(!c.done&&c.slaMin>=0)slaOff[i]=Math.max(0,slaOff[i]+Math.floor(Math.random()*3));});
+  render();
+  toast('🔄 数据已刷新');
+  const el=document.getElementById('refresh-status');
+  if(el){el.textContent='⟳ 刚刚刷新';setTimeout(()=>{if(el)el.textContent='⟳ 30s 后刷新';},1200);}
+}
+setInterval(()=>{
+  CASES.forEach((_,i)=>{if(CASES[i].slaMin>=0&&!CASES[i].done)slaOff[i]++;});
+  // 30s 倒计时
+  refreshCountdown--;
+  if(refreshCountdown<=0){doAutoRefresh();refreshCountdown=30;}
+  else{const el=document.getElementById('refresh-status');if(el&&!el.textContent.startsWith('⟳ 刚'))el.textContent='⟳ '+refreshCountdown+'s 后刷新';}
+  document.querySelectorAll('[data-si]').forEach(el=>{
+    const i=+el.dataset.si,c=CASES[i];if(!c||c.slaMin<0||c.done)return;
+    const rem=Math.max(0,c.slaMin*60-slaOff[i]);
+    const h=Math.floor(rem/3600),m=Math.floor((rem%3600)/60),s=rem%60;
+    el.textContent='剩余 '+(h>0?`${h}h ${String(m).padStart(2,'0')}m`:`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
+    el.className='sla-v '+slaClass(rem);el.dataset.si=i;
+  });
+  const urgent=CASES.find(c=>!c.done&&c.z==='cr')||CASES.find(c=>!c.done);
+  if(urgent){const ui=CASES.indexOf(urgent);const se=document.getElementById('fc-sla');if(se){if(urgent.slaMin<0){se.textContent='SLA已暂停';}else{const rem=Math.max(0,urgent.slaMin*60-slaOff[ui]);se.textContent='剩余 '+String(Math.floor(rem/60)).padStart(2,'0')+':'+String(rem%60).padStart(2,'0');}}}
+},1000);
+let fcOpen=true;
+function toggleFC(){fcOpen=!fcOpen;const b=document.getElementById('fc-body'),t=document.getElementById('fc-toggle');if(b)b.style.display=fcOpen?'':'none';if(t)t.textContent=fcOpen?'收起 ▲':'展开 ▼';}
+(()=>{const d=new Date(),el=document.getElementById('fc-date');if(el)el.textContent=String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'  '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');})();
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  if(e.key==='?'){showSC();return;}
+  if(e.key==='Escape'){if(document.getElementById('scOverlay').classList.contains('open')){hideSC();return;}if(activeHCi>=0){hideHC();return;}if(openDr>=0){closeD(openDr);return;}return;}
+  if((e.key==='j'||e.key==='ArrowDown')&&!e.ctrlKey){
+    e.preventDefault();kbIdx=Math.min(kbIdx+1,Math.max(0,visItems.length-1));render();
+    const item=visItems[kbIdx];if(item){const r=document.getElementById('cr-'+item.i),ct=document.getElementById('mainContent');if(r&&ct){const t=r.offsetTop,h=ct.clientHeight,s=ct.scrollTop;if(t+80>s+h)ct.scrollTop=t+80-h;}}return;
+  }
+  if((e.key==='k'||e.key==='ArrowUp')&&!e.ctrlKey){
+    e.preventDefault();kbIdx=Math.max(kbIdx-1,0);render();
+    const item=visItems[kbIdx];if(item){const r=document.getElementById('cr-'+item.i),ct=document.getElementById('mainContent');if(r&&ct){const t=r.offsetTop,s=ct.scrollTop;if(t<s+8)ct.scrollTop=Math.max(0,t-8);}}return;
+  }
+  if(e.key==='Enter'){const item=visItems[kbIdx];if(item)toggleD(item.i);return;}
+  if(e.key==='1'){const item=visItems[kbIdx];if(item){openD(item.i);toast('▶ '+item.c.act+'：#'+item.c.id+' '+item.c.pat);}return;}
+  if(e.key==='c'||e.key==='C'){const item=visItems[kbIdx];if(item&&(item.c.z==='pe'||item.c.z==='pa'))toast('📨 催办已发送');return;}
+  if(e.ctrlKey&&e.key==='f'){e.preventDefault();document.getElementById('srch').focus();return;}
+  if(e.ctrlKey&&['1','2','3','4'].includes(e.key)){e.preventDefault();fz(['cr','ur','pe','pa'][+e.key-1]);return;}
+});
+function showSC(){document.getElementById('scOverlay').classList.add('open');}
+function hideSC(){document.getElementById('scOverlay').classList.remove('open');}
+function toast(msg){const a=document.getElementById('toasts'),t=document.createElement('div');t.className='toast';t.textContent=msg;a.appendChild(t);setTimeout(()=>t.remove(),2600);}
+buildFC();render();
+setTimeout(()=>toast('⌨ 提示：按 ? 查看键盘快捷键，Ctrl+1~4 快速筛选区域'),2200);
+buildPlanTab();
+
+// ─── AI Panel ───────────────────────────────────────────
+function toggleAIPanel(){
+  const p=document.getElementById('aiPanel');
+  p.classList.toggle('collapsed');
+}
+function handleCommClick(caseId){
+  if(caseId==='system'){toast('📋 系统通知');return;}
+  const idx=CASES.findIndex(c=>c.id===caseId);
+  if(idx>=0)openD(idx);
+}
+function markAllRead(){
+  document.querySelectorAll('.comm-item.unread').forEach(el=>el.classList.remove('unread'));
+  const badge=document.querySelector('.comm-badge');
+  if(badge)badge.style.display='none';
+  toast('✅ 全部消息已标记为已读');
+}
+function switchAIP(tab){
+  document.querySelectorAll('.apt').forEach(b=>b.classList.toggle('on',b.dataset.aip===tab));
+  document.querySelectorAll('.aip-tab').forEach(t=>{
+    const isOn=t.id==='aip-'+tab;
+    t.style.display=isOn?'flex':'none';
+    t.classList.toggle('on',isOn);
+  });
+  if(tab==='plan')buildPlanTab();
+}
+function buildPlanTab(){
+  const el=document.getElementById('plan-scroll');if(!el)return;
+  const now=new Date();let ch=now.getHours(),cm=now.getMinutes();
+  const tFmt=(hh,mm)=>String(hh%24).padStart(2,'0')+':'+String(mm%60).padStart(2,'0');
+  const addMin=(h,m,d)=>{const t=h*60+m+d;return[Math.floor(t/60),t%60];};
+  const redCases=CASES.filter(c=>!c.done&&c.z==='cr');
+  const yelCases=CASES.filter(c=>!c.done&&c.z==='ur');
+  const total=CASES.filter(c=>!c.done).length;
+  const pct=Math.round(doneCnt/(doneCnt+total)*100);
+  let html=`<div class="goal-bar"><div class="gb-row"><span>今日完成进度</span><span class="gb-val">${pct}%</span></div><div class="gb-prog-bg"><div class="gb-prog-fill" style="width:${pct}%"></div></div><div style="font-size:10px;color:var(--primary);margin-top:5px;font-weight:500">已完成 ${doneCnt} 件 · 待处理 ${total} 件 · 共 ${doneCnt+total} 件</div></div>`;
+  if(redCases.length){
+    html+=`<div class="aip-sec-title">🔴 红区 · 立即处理</div>`;
+    redCases.forEach(c=>{
+      const dur=c.hType==='ret'?20:15;
+      const riskNote=c.stars===1?' <span style="color:var(--danger);font-weight:700">⚠ 医生退回率高</span>':'';
+      html+=`<div class="plan-item pi-cr"><div class="pi-time">${tFmt(ch,cm)}</div><div class="pi-body"><div class="pi-name">#${c.id} · ${c.pat}</div><div class="pi-sub">${c.clinic} · ${c.doc}${riskNote}</div></div><span class="pi-dur dur-cr">~${dur}min</span></div>`;
+      [ch,cm]=addMin(ch,cm,dur+5);
+    });
+  }
+  const riskyDocs=CASES.filter(c=>!c.done&&c.stars===1);
+  if(riskyDocs.length){
+    html+=`<div class="alert-row"><span class="alert-icon">⚠️</span><div class="alert-body"><b>高退回风险医生（★）</b>${riskyDocs.map(c=>'#'+c.id+' '+c.pat+' → '+c.doc).join('<br>')}<br><span style="color:var(--muted)">建议修改前发送参数预确认消息</span></div></div>`;
+  }
+  if(yelCases.length){
+    html+=`<div class="aip-sec-title" style="margin-top:10px">🟡 黄区 · 下午推进</div>`;
+    yelCases.forEach(c=>{
+      const dur=35;
+      html+=`<div class="plan-item pi-ur"><div class="pi-time">${tFmt(ch,cm)}</div><div class="pi-body"><div class="pi-name">#${c.id} · ${c.pat}</div><div class="pi-sub">${c.clinic} · ${c.doc} · SLA ${c.slaMin>=60?Math.floor(c.slaMin/60)+'h':(c.slaMin+'min')}</div></div><span class="pi-dur dur-ur">~${dur}min</span></div>`;
+      [ch,cm]=addMin(ch,cm,dur+5);
+    });
+  }
+  html+=`<div style="margin-top:12px;padding:9px 11px;background:var(--success-bg);border:1px solid #86efac;border-radius:var(--r-sm);font-size:11px;color:var(--success);font-weight:500">✅ 按此计划，预计 <strong>${tFmt(ch,cm)}</strong> 完成全部待处理病例，SLA 达成率 91%</div>`;
+  el.innerHTML=html;
+}
+
+// AI Chat
+const AI_KB={
+  '紧急':'根据当前SLA分析，最紧急的病例是 <strong>#001234 张明</strong>（韶华口腔），剩余时效约 85 分钟，属于今日最高优先级。<br><br>修改内容：压低 11/21（0.5mm）、远中移动 16/26（-1.5mm）、增加 13/23 附件。<br><br>注意：关联医生王医生 ★，退回率高，建议快速核对后提交，避免二次退回。',
+  '最紧':'根据当前SLA分析，最紧急的病例是 <strong>#001234 张明</strong>（韶华口腔），剩余时效约 85 分钟，属于今日最高优先级。<br><br>修改内容：压低 11/21（0.5mm）、远中移动 16/26（-1.5mm）、增加 13/23 附件。',
+  '王医生':'韶华口腔王医生（★）本月退回率约 <strong>67%</strong>，远高于平台均值 23%。<br><br>主要退回原因集中在：<br>• 附件位置偏差<br>• 前牙转矩控制不足<br><br>涉及今日病例：#001234 张明、#001302 黄俊峰。<br><br>建议：提交前主动发送参数预确认消息，附关键截图。',
+  '张明':'张明（32岁，#001234）来自韶华口腔。<br><br>退回原因：<strong>11/21需压低0.5mm，增加13/23附件，16/26远中移动-1.5mm</strong>。<br><br>风险点：<br>• 关联医生王医生 ★，退回率高<br>• 剩余SLA 约 85min，今日最紧迫<br><br>建议先处理此件，参考V1对比表快速核对差异。',
+  '完成多少':'按当前工作节奏（退回件~20min、首版~35min），今天预计可完成全部 12 件待处理病例。<br><br>预计完成时间：<strong>约傍晚 18:10</strong><br>预计SLA达成率：<strong>91%</strong><br><br>风险点：若王医生再次退回张明的方案，红区件数会增加约1件。',
+  '能完成':'按当前工作节奏（退回件~20min、首版~35min），今天预计可完成全部 12 件待处理病例。<br><br>预计SLA达成率：<strong>91%</strong>',
+  '灰区':'当前2件灰区病例均处于资料缺失状态：<br><br>• <strong>郑志强</strong>（#001189）— 缺右侧咬合像（必需）+ CBCT（建议），已等待 2 天，催办2次无响应<br>• <strong>马美玲</strong>（#001203）— 缺 CBCT，已等待 1 天<br><br>SLA目前已暂停，不影响你的达成率。<br><br>建议：使用"批量操作"中的一键催办功能，或直接拨打诊所电话跟进。',
+  '诊所':'按今日病例数排名：<br><br>1. 韶华口腔 — 2件 ⚠ 王医生退回率高<br>2. 欧洲口腔 — 1件<br>3. 华美口腔 — 1件<br>4. 其他诊所 — 8件（各1件）<br><br>风险最高：韶华口腔（王医生★，退回率67%）',
+};
+function aiAsk(q){
+  addChatMsg(q,'user');
+  const thinking=addChatMsg('正在分析…','ai thinking');
+  setTimeout(()=>{
+    let resp='';
+    for(const[k,v] of Object.entries(AI_KB)){if(q.includes(k)){resp=v;break;}}
+    if(!resp){
+      const pending=CASES.filter(c=>!c.done);
+      resp=`关于"${q}"，我分析了当前工作台数据：<br><br>• 待处理 <strong>${pending.length}</strong> 件（红 ${CASES.filter(c=>!c.done&&c.z==='cr').length} / 黄 ${CASES.filter(c=>!c.done&&c.z==='ur').length} / 蓝 ${CASES.filter(c=>!c.done&&c.z==='pe').length} / 灰 ${CASES.filter(c=>!c.done&&c.z==='pa').length}）<br>• 今日已完成 <strong>${doneCnt}</strong> 件<br><br>可以用更具体的关键词提问，例如病例编号、患者姓名、医生名称，或者问我今日策略建议。`;
+    }
+    if(thinking&&thinking.parentNode){thinking.innerHTML=`<div class="msg-tag">🤖 AI 助手</div>${resp}`;thinking.classList.remove('thinking');}
+  },700+Math.random()*500);
+}
+function addChatMsg(text,cls){
+  const el=document.getElementById('chatMsgs');if(!el)return null;
+  const d=document.createElement('div');d.className='msg '+cls;
+  if(cls.includes('ai')){d.innerHTML=`<div class="msg-tag">🤖 AI 助手</div>${text}`;}
+  else{d.textContent=text;}
+  el.appendChild(d);el.scrollTop=el.scrollHeight;return d;
+}
+function chatSend(){const inp=document.getElementById('chatInput');if(!inp||!inp.value.trim())return;aiAsk(inp.value.trim());inp.value='';inp.style.height='';}
+function chatKeydown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chatSend();}}
+function batchAct(name,msg){toast(msg||'✅ 已执行：'+name);}
+// ── Page switching ──
+function switchPage(name){
+  document.querySelectorAll('.page-view').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.s-item[id^="nav-"]').forEach(el=>el.classList.remove('active'));
+  const page=document.getElementById('page-'+name);
+  if(page)page.classList.add('active');
+  const nav=document.getElementById('nav-'+name);
+  if(nav)nav.classList.add('active');
+}
+// ── Template modal ──
+function openTmplModal(){document.getElementById('tmplModal').classList.add('open');}
+function closeTmplModal(){document.getElementById('tmplModal').classList.remove('open');}
+// Close modal on overlay click
+document.getElementById('tmplModal').addEventListener('click',function(e){if(e.target===this)closeTmplModal();});
+
+// ── 查看消息原件弹窗 ──
+const MSG_DATA={
+  '001234':{
+    from:'王医生（韶华口腔）',avatar:'王',time:'今天 07:30',
+    raw:`陈薇你好，张明这个案子我看了一下，有几个地方需要调整：
+
+1. 11和21需要再压低一点，大概0.5mm左右，现在感觉稍微高了
+2. 16和26要往远中移动，大概-1.5mm，之前的设计没有体现出来
+3. 13和23需要增加附件，这个比较重要
+
+麻烦你尽快修改一下，我这边诊所下午还有复诊，希望今天能给到新版本，谢谢！`,
+    cmp:[{p:'11 压低',v1:'+0.2mm',now:'+0.7mm',diff:true},{p:'16 远中移动',v1:'无',now:'-1.5mm（新增）',diff:true},{p:'13 附件',v1:'无',now:'需要（新增）',diff:true}],
+    note:'医生消息中隐含「尽快」「今天」等紧迫性词汇，结合剩余SLA 85min，AI自动提升为红区最高优先。附件V1方案中远中移动参数与本次要求偏差显著（-0.5mm→-1.5mm），建议重点核查支抗设计。'
+  },
+  '001198':{
+    from:'内审 Leader（李工）',avatar:'李',time:'今天 08:15',
+    raw:`陈薇，李晓燕这个方案内审没通过，问题如下：
+
+前牙覆合深度超标，现在是4mm，我们标准要控制在2mm以内。
+建议增加前牙咬合垫的设计，这个对深覆合矫治很关键。
+另外11-21的转矩也要复核一下，整体垂直向控制需要再调整。
+
+请修改后重新提交内审，谢谢。`,
+    cmp:[{p:'前牙覆合',v1:'4mm',now:'≤2mm（要求）',diff:true},{p:'咬合垫',v1:'无',now:'需要（新增）',diff:true}],
+    note:'内审驳回消息来自内部Leader，优先级高于医生退回。识别到"超标""没通过"等否定词，自动标记为需立即修改。垂直向控制为通用规范检查项，已加入修改清单。'
+  },
+  '001256':{
+    from:'刘医生（华美口腔）',avatar:'刘',time:'今天 06:50',
+    raw:`你好，王大海的方案有问题，16需要再往后移，移到大概-1.5mm，现在的-0.5mm不够。
+
+另外整个咬合平面的倾斜度我觉得不太对，你帮我重新评估一下，附件位置也要跟着更新。
+
+这个是第二次退回了，之前的问题没有完全解决，请认真检查。`,
+    cmp:[{p:'16 位移',v1:'-0.5mm',now:'-1.5mm',diff:true},{p:'咬合平面',v1:'现状',now:'需重新评估',diff:true}],
+    note:'检测到"第二次退回"关键词，AI自动升级红区优先级。-0.5mm→-1.5mm偏差超过阈值（>0.8mm），标注为高风险修改项。建议提交前核查支抗是否足够支持1.5mm远中移动量。'
+  }
+};
+let curMoCase=null,moReqState=[];
+function openMsgModal(i){
+  const c=CASES[i];
+  const d=MSG_DATA[c.id];
+  if(!d){toast('⚠ 该病例暂无消息原件');return;}
+  curMoCase=i;
+  document.getElementById('mo-title').textContent=c.pat+' #'+c.id+' 消息原件';
+  document.getElementById('mo-who').textContent=d.from;
+  document.getElementById('mo-avatar').textContent=d.avatar;
+  document.getElementById('mo-from').textContent=d.from;
+  document.getElementById('mo-time').textContent=d.time;
+  document.getElementById('mo-raw-text').textContent=d.raw;
+  // AI识别
+  document.getElementById('mo-req-count').textContent=d.cmp.length;
+  document.getElementById('mo-ai-rows').innerHTML=d.cmp.map(r=>`<div class="ai-rec-row"><span class="ai-rec-key">${r.p}</span><span class="ai-rec-val">${r.now}</span>${r.diff?`<span class="ai-rec-diff">有变化</span>`:''}</div>`).join('');
+  document.getElementById('mo-ai-note').innerHTML=d.note;
+  // 增减需求 — 从 dTodos 读取
+  const todos=c.dTodos||[];
+  moReqState=todos.map(t=>({txt:t,on:true,src:'AI识别'}));
+  renderMoReqs();
+  // 双列布局，无需切换 tab
+  document.getElementById('msgModal').classList.add('open');
+}
+function closeMsgModal(){document.getElementById('msgModal').classList.remove('open');curMoCase=null;}
+let cdSelectedChannel='微信';
+function openContactDoc(){
+  const c=curMoCase;
+  if(!c){toast('请先打开一个病例的消息原件');return;}
+  document.getElementById('cd-case-label').textContent=`病例 #${c.id} · ${c.pat}`;
+  document.getElementById('cd-doc-av').textContent=c.doc?c.doc[0]:'医';
+  document.getElementById('cd-doc-name').textContent=c.doc||'主治医生';
+  const starMap={1:'★☆☆ 退回率较高，请重点确认',2:'★★☆ 偶有退回，注意细节',3:'★★★ 配合良好'};
+  document.getElementById('cd-doc-meta').innerHTML=`${c.clinic||''} · <span class="cd-doc-star">${starMap[c.stars]||''}</span>`;
+  const todos=c.dTodos||c.hd?.todos||[];
+  const preMsg=`您好${c.doc?'，'+c.doc:''}！\n\n病例 #${c.id}（${c.pat}）方案已进行修改，具体调整如下：\n${todos.map((t,i)=>`${i+1}. ${t}`).join('\n')}\n\n请在方便时查看并确认，如有问题欢迎随时反馈。\n\n悦排设计团队`;
+  document.getElementById('cd-msg-pre').textContent=preMsg;
+  cdSelectedChannel='微信';
+  document.querySelectorAll('.cd-ch').forEach(el=>el.style.borderColor='');
+  document.querySelectorAll('.cd-ch')[0].style.borderColor='var(--primary)';
+  document.getElementById('contactDocModal').classList.add('open');
+}
+function closeContactDoc(){document.getElementById('contactDocModal').classList.remove('open');}
+function selectChannel(el,name){
+  cdSelectedChannel=name;
+  document.querySelectorAll('.cd-ch').forEach(c=>c.style.borderColor='');
+  el.style.borderColor='var(--primary)';
+  if(name==='电话'&&curMoCase){
+    document.getElementById('cd-msg-pre').textContent=`联系电话：138-XXXX-${Math.floor(1000+Math.random()*9000)}\n（医生：${curMoCase.doc}，${curMoCase.clinic}）`;
+  }
+}
+function sendContactMsg(){
+  const ch=cdSelectedChannel;
+  closeContactDoc();
+  toast(`✅ 已通过 ${ch} 发送给${curMoCase?.doc||'医生'}`);
+}
+function switchMoTab(idx){/* no-op: 双列布局无需切换 */}
+function renderMoReqs(){
+  document.getElementById('mo-req-list').innerHTML=moReqState.map((r,i)=>`<div class="req-item"><div class="req-cb ${r.on?'on':''}" onclick="toggleReq(${i})">${r.on?'✓':''}</div><div class="req-item-txt" style="${r.on?'':'text-decoration:line-through;color:var(--muted)'}">${r.txt}</div><div class="req-item-src">${r.src}</div></div>`).join('');
+}
+function toggleReq(i){moReqState[i].on=!moReqState[i].on;renderMoReqs();}
+function addReq(){
+  const inp=document.getElementById('mo-req-input');
+  const v=inp.value.trim();
+  if(!v)return;
+  moReqState.push({txt:v,on:true,src:'手动添加'});
+  renderMoReqs();
+  inp.value='';
+}
+function saveReqs(){
+  if(curMoCase===null)return;
+  const kept=moReqState.filter(r=>r.on).map(r=>r.txt);
+  CASES[curMoCase].dTodos=kept;
+  CASES[curMoCase].dDone=kept.map(()=>false);
+  if(openDr===curMoCase){render();renderTab();setTimeout(()=>openD(curMoCase),50);}
+  closeMsgModal();
+  toast('✅ 需求变更已保存，修改清单已更新');
+}
+</script>
+</body>
+</html>
